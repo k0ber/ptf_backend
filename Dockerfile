@@ -6,7 +6,7 @@ COPY . .
 RUN chmod +x gradlew
 
 # 1. Запускаем сборку и выполняем таску installDist
-RUN ./gradlew :app:installDist --no-daemon
+RUN ./gradlew :app:installDist --no-daemon --stacktrace --info
 
 # ---
 
