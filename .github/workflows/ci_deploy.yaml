@@ -9,15 +9,17 @@ on:
 
 jobs:
   docker_and_deploy:
+    # Запускается только после успешного завершения "Build"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     runs-on: ubuntu-latest
-    environment: production # Указывает на окружение (можно настроить в Settings -> Environments)
+    environment: production
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # 1. Логин в GHCR (Использует DOCKER_USERNAME и DOCKER_PAT)
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -25,21 +27,28 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PAT }}
 
+      # 2. Сборка и Push образа
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
+          # Используем имя репозитория напрямую (предполагая, что оно теперь в нижнем регистре)
           tags: |
             ghcr.io/${{ github.repository }}/ptf_backend:${{ github.sha }}
             ghcr.io/${{ github.repository }}/ptf_backend:latest
 
+      # 3. Развертывание по SSH
       - name: Deploy via SSH and Restart Docker
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Передаем Docker-переменные в среду SSH-скрипта
+          envs: |
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            DOCKER_PAT=${{ secrets.DOCKER_PAT }}
 
           script: |
             echo "Starting deployment on VDS..."
@@ -49,21 +58,21 @@ jobs:
             cd "$PROJECT_DIR"
             
             # Авторизация в GHCR на VDS для скачивания образа
+            # Переменные DOCKER_USERNAME и DOCKER_PAT доступны здесь
             echo "Authorizing Docker on VDS..."
-            echo "${{ secrets.DOCKER_PAT }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+            echo "${DOCKER_PAT}" | docker login ghcr.io -u "${DOCKER_USERNAME}" --password-stdin
             
             # Задаем переменные, которые используются в docker-compose.yml
             export IMAGE_TAG="${{ github.sha }}"
-            export IMAGE_REPO="${{ github.repository }}"
+            export IMAGE_REPO="${{ github.repository }}" # Теперь без lower()
             
             echo "Pulling image: ghcr.io/$IMAGE_REPO/ptf_backend:$IMAGE_TAG"
             
-            # 1. Скачиваем новый образ (docker compose pull)
-            # 2. Запускаем/перезапускаем контейнер (docker compose up -d)
+            # Скачиваем новый образ и запускаем контейнеры
             docker compose pull app
             docker compose up -d
             
-            # Очистка старых образов для экономии места
+            # Очистка
             docker image prune -f
             
             echo "Deployment finished. Check logs for ptf_backend_app container."
