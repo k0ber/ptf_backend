@@ -44,11 +44,15 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key_path: /tmp/id_rsa_ci
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           envs: |
             DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             DOCKER_PAT=${{ secrets.DOCKER_PAT }}
+
+          script_before: |
+            echo "${{ secrets.SSH_PRIVATE_KEY_BASE64 }}" | base64 -d > /tmp/id_rsa_ci
+            chmod 600 /tmp/id_rsa_ci  
 
           script: |
             echo "Starting deployment on VDS..."
