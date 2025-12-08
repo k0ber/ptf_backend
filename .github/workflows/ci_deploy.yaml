@@ -34,24 +34,12 @@ jobs:
             ghcr.io/${{ github.repository }}/ptf_backend:${{ github.sha }}
             ghcr.io/${{ github.repository }}/ptf_backend:latest
 
-      # ШАГ 3.1: Декодирование приватного ключа
-      # Создаем файл ключа в рабочем каталоге, чтобы он был доступен для SSH-экшена
-      - name: Decode SSH Private Key
-        shell: bash
-        run: |
-          # Декодируем Base64 и сохраняем его в файл, доступный для следующего шага
-          echo "${{ secrets.SSH_PRIVATE_KEY_BASE64 }}" | base64 -d > private_key.txt
-          chmod 600 private_key.txt
-
-      # 3.2: Развертывание по SSH
       - name: Deploy via SSH and Restart Docker
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          # Используем путь к файлу, созданному на предыдущем шаге
-          key: private_key.txt
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           # Передаем Docker-переменные для использования в скрипте VDS
           envs: |
