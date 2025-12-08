@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: ptf_db        # Имя БД
+      POSTGRES_USER: ptf_db_user # Имя пользователя
+      POSTGRES_PASSWORD: "2354"  # Пароль
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    image: ghcr.io/${IMAGE_REPO:-k0ber/PtfBackend}/ptf_backend:${IMAGE_TAG:-latest}
+    container_name: ptf_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      # используются Ktor через application.conf для сборки JDBC URL и подключения.
+      DB_HOST: db               # Хост для БД - это имя сервиса 'db'
+      DB_NAME: ptf_db           # Имя БД (совпадает с POSTGRES_DB)
+      DB_USER: ptf_db_user
+      DB_PASSWORD: "2354"
+
+      # JWT переменные для application.conf
+      JWT_SECRET: "IL0+3L34rn!ngKt-rWi%%1hJ0s3L_+u1sG_S4ndHyp3r#kl"
+      JWT_EXPIRATION_MS: 3600000
+
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

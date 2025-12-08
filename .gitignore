@@ -1,0 +1,32 @@
+# IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.history
+.external_build/
+local.properties
+
+# GRADLE
+build/
+**/build/
+!src/**/build/
+**/out/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+/gradle/wrapper/dists/
+
+# KAPT
+.kotlin/
+^/
+/kapt/
+/ksp/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+=== Docker/Runtime Files ===
+volumes/
+*.log

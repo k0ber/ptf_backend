@@ -1,0 +1,222 @@
+locale: en
+topics:
+  - name: "🏃‍♂️ Activity"
+    slug: sports_outdoor
+    description: "Active recreation, team sports, and fitness."
+    tags: [sports, fitness, outdoors]
+    children:
+      - name: "⚽ Football / Soccer"
+        slug: football
+      - name: "🏀 Basketball"
+        slug: basketball
+      - name: "🏋️‍♀️ Gym & Fitness"
+        slug: gym_fitness
+      - name: "🚴‍♀️ Cycling"
+        slug: cycling
+      - name: "🏕 Camping & Hiking"
+        slug: camping_hiking
+      - name: "🏄 Water Sports"
+        slug: water_sports
+        children:
+          - name: "🏊 Swimming"
+            slug: swimming
+          - name: "🏄 Surfing"
+            slug: surfing
+          - name: "🚣 Kayaking"
+            slug: kayaking
+
+  - name: "🎮 Gaming"
+    slug: gaming
+    description: "Video games, board games, and role-playing adventures."
+    tags: [games, entertainment]
+    children:
+      - name: "💻 PC Gaming"
+        slug: pc_gaming
+        children:
+          - name: "🔥 Counter-Strike 2"
+            slug: cs2
+          - name: "🧙 Dota 2"
+            slug: dota2
+          - name: "🏰 Minecraft"
+            slug: minecraft
+          - name: "🪓 Valheim"
+            slug: valheim
+      - name: "🎮 Console Gaming"
+        slug: console_gaming
+        children:
+          - name: "🎮 PlayStation"
+            slug: playstation
+          - name: "🕹 Xbox"
+            slug: xbox
+          - name: "🎮 Nintendo Switch"
+            slug: nintendo_switch
+      - name: "🎲 Board Games"
+        slug: board_games
+        children:
+          - name: "♟ Chess"
+            slug: chess
+          - name: "🎴 Codenames"
+            slug: codenames
+          - name: "🧩 Catan"
+            slug: catan
+      - name: "🧝 Tabletop RPG"
+        slug: tabletop_rpg
+        children:
+          - name: "🐉 Dungeons & Dragons"
+            slug: dnd
+          - name: "🕵️ Call of Cthulhu"
+            slug: cthulhu
+
+  - name: "🎨 Art"
+    slug: art_creativity
+    tags: [art, creativity]
+    children:
+      - name: "🖌 Drawing & Painting"
+        slug: drawing_painting
+      - name: "📸 Photography"
+        slug: photography
+      - name: "🎭 Acting & Theatre"
+        slug: acting
+      - name: "🎬 Filmmaking"
+        slug: filmmaking
+      - name: "🎵 Music & Singing"
+        slug: music
+        children:
+          - name: "🎸 Guitar"
+            slug: guitar
+          - name: "🎹 Piano"
+            slug: piano
+          - name: "🎤 Vocals"
+            slug: vocals
+          - name: "🥁 Drums"
+            slug: drums
+      - name: "🧶 Crafts & DIY"
+        slug: crafts_diy
+        children:
+          - name: "🪡 Sewing"
+            slug: sewing
+          - name: "🧵 Knitting"
+            slug: knitting
+          - name: "🎁 Handmade Gifts"
+            slug: handmade_gifts
+
+  - name: "📚 Learning"
+    slug: learning
+    tags: [education, study]
+    children:
+      - name: "🗣 Languages"
+        slug: languages
+        children:
+          - name: "🇬🇧 English"
+            slug: english
+          - name: "🇪🇸 Spanish"
+            slug: spanish
+          - name: "🇯🇵 Japanese"
+            slug: japanese
+          - name: "🇰🇷 Korean"
+            slug: korean
+          - name: "🇩🇪 German"
+            slug: german
+      - name: "💻 Programming"
+        slug: programming
+        children:
+          - name: "☕ Kotlin"
+            slug: kotlin
+          - name: "🐍 Python"
+            slug: python
+          - name: "🌐 Web Development"
+            slug: web_dev
+          - name: "🤖 AI & Machine Learning"
+            slug: ai_ml
+      - name: "📊 Business & Marketing"
+        slug: business_marketing
+      - name: "🎓 Study Groups"
+        slug: study_groups
+
+  - name: "✈️ Exploration"
+    slug: travel
+    tags: [travel, adventure]
+    children:
+      - name: "🗺 Backpacking"
+        slug: backpacking
+      - name: "🏝 Beach Vacations"
+        slug: beach_vacations
+      - name: "🏔 Mountain Trips"
+        slug: mountain_trips
+      - name: "🏙 City Breaks"
+        slug: city_breaks
+      - name: "🌍 Cultural Exploration"
+        slug: culture_travel
+
+  - name: "🐾 Pets"
+    slug: pets
+    tags: [animals, care, pets]
+    children:
+      - name: "🐶 Dogs"
+        slug: dogs
+      - name: "🐱 Cats"
+        slug: cats
+      - name: "🐠 Aquarium & Fishkeeping"
+        slug: fishkeeping
+      - name: "🐦 Birds"
+        slug: birds
+      - name: "🐴 Horses & Riding"
+        slug: horses
+
+  - name: "💻 Technology"
+    slug: tech_science
+    tags: [tech, science]
+    children:
+      - name: "🚀 Space & Astronomy"
+        slug: astronomy
+      - name: "🔬 Science"
+        slug: science
+      - name: "📱 Gadgets & Hardware"
+        slug: gadgets
+      - name: "🧠 Artificial Intelligence"
+        slug: ai
+      - name: "🔧 Engineering & Robotics"
+        slug: robotics
+
+  - name: "🍳 Food"
+    slug: food_cooking
+    tags: [food, cooking]
+    children:
+      - name: "🍕 Home Cooking"
+        slug: home_cooking
+      - name: "🍰 Baking"
+        slug: baking
+      - name: "☕ Coffee Culture"
+        slug: coffee
+      - name: "🍸 Mixology"
+        slug: mixology
+      - name: "🥗 Healthy Eating"
+        slug: healthy_food
+
+  - name: "🧘 Wellness"
+    slug: wellness
+    tags: [health, wellbeing]
+    children:
+      - name: "🧘 Yoga"
+        slug: yoga
+      - name: "🧠 Meditation & Mindfulness"
+        slug: meditation
+      - name: "🏃 Fitness Challenges"
+        slug: fitness_challenges
+      - name: "📆 Productivity & Habits"
+        slug: productivity
+      - name: "💤 Sleep & Recovery"
+        slug: sleep
+
+  - name: "🤝 Social"
+    slug: social_volunteering
+    tags: [social, community]
+    children:
+      - name: "💬 Conversation Clubs"
+        slug: conversation_clubs
+      - name: "🤲 Volunteering"
+        slug: volunteering
+      - name: "🎓 Mentorship"
+        slug: mentorship
+      - name: "👥 Events & Meetups"
+        slug: meetups
