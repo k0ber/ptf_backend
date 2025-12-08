@@ -1,18 +1,17 @@
 # ЭТАП 1: СБОРКА (BUILDER)
-# Используем образ с предустановленным Gradle и JDK 21
-FROM gradle:jdk21 AS builder
+FROM gradle:jdk17 AS builder
 WORKDIR /app
 COPY . .
 RUN chmod +x gradlew
 
 # 1. Запускаем сборку и выполняем таску installDist
-RUN ./gradlew :app:installDist --no-daemon --stacktrace --info
+RUN ./gradlew :app:installDist --no-daemon --info
 
 # ---
 
 # ЭТАП 2: ФИНАЛЬНЫЙ ОБРАЗ (RUNTIME)
 # Используем легкий JRE на Alpine Linux
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /opt/app
 
 # 2. Копируем ВСЕ файлы, необходимые для запуска, из папки install/app
