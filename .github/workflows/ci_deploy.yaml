@@ -45,7 +45,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # Передаем Docker-переменные в среду SSH-скрипта
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           envs: |
             DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             DOCKER_PAT=${{ secrets.DOCKER_PAT }}
