@@ -22,15 +22,16 @@ services:
     depends_on:
       - db
     environment:
-      # используются Ktor через application.conf для сборки JDBC URL и подключения.
       DB_HOST: db               # Хост для БД - это имя сервиса 'db'
       DB_NAME: ptf_db           # Имя БД (совпадает с POSTGRES_DB)
       DB_USER: ptf_db_user
       DB_PASSWORD: "2354"
 
-      # JWT переменные для application.conf
-      JWT_SECRET: "IL0+3L34rn!ngKt-rWi%%1hJ0s3L_+u1sG_S4ndHyp3r#kl"
+      JWT_SECRET: "IL0j3L34rnmqgKt-rWi%%1hJ0s3Li.u1sG_S4ndHyp3r9l"
+      JWT_REALM: "KtorRealm"
       JWT_EXPIRATION_MS: 3600000
+      JWT_ISSUER: "http://0.0.0.0:8080/"
+      JWT_AUDIENCE: "ptf-users"
 
     restart: unless-stopped
 
