@@ -48,6 +48,15 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ github.sha }}
             ghcr.io/${{ github.repository }}:latest
 
+      - name: Copy docker-compose.yml via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.yml"
+          target: "/root/ptf-backend"
+
       ### ДЕПЛОЙ НА VDS (CD) ###
       - name: Deploy via SSH and Restart Docker
         uses: appleboy/ssh-action@v1.0.3
@@ -62,14 +71,6 @@ jobs:
             
             PROJECT_DIR="/root/ptf-backend"
             cd "$PROJECT_DIR" || exit 1
-
-            echo "Ensuring clean Git working tree..."
-            git reset --hard HEAD
-            git clean -fd
-  
-            # todo: we need only docker-compose.yml actually
-            echo "Pulling latest files from Git..."
-            git pull origin main
             
             # ----------------------------------------------------
             # 1. ЭКСПОРТ КОНФИГУРАЦИИ Ktor/DB (для docker-compose)
