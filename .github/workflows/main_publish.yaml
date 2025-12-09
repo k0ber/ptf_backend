@@ -98,7 +98,7 @@ jobs:
             docker compose up -d
             
             echo "Deployment finished. Checking application status."
-            docker logs ptf_app --tail 20 
+            docker logs ptf_backend_app --tail 20
             
             # 5. Очистка старых образов
             docker image prune -f
