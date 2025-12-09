@@ -41,7 +41,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-          # Передаем Docker-переменные для использования в скрипте VDS
+          allenvs: true
+
           envs: |
             DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             DOCKER_PAT=${{ secrets.DOCKER_PAT }}
