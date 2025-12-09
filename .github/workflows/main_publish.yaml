@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  ci_cd:
+  publish:
     runs-on: ubuntu-latest
     environment: production
 
@@ -37,7 +37,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.UPLOAD_TOKEN }}
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
