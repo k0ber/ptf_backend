@@ -57,6 +57,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           script: |
+            set -euo pipefail
             echo "Starting deployment /root/ptf-backend on VDS..."
             
             PROJECT_DIR="/root/ptf-backend"
