@@ -41,13 +41,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-          allenvs: true
-
-          envs: |
-            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-            DOCKER_PAT=${{ secrets.DOCKER_PAT }}
-
           script: |
+            export DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
+            export DOCKER_PAT="${{ secrets.DOCKER_PAT }}"
+            
             echo "Starting deployment on VDS..."
             
             PROJECT_DIR="/root/ptf-backend" 
