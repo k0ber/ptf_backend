@@ -20,16 +20,18 @@ services:
     depends_on:
       - db
     environment:
+      # --- DB CONFIGURATION ---
       - DB_HOST=db
-      - DB_NAME=ptf_db
-      - DB_USER
-      - DB_PASSWORD
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
 
-      - JWT_SECRET
-      - JWT_REALM
-      - JWT_EXPIRATION_MS
-      - JWT_ISSUER
-      - JWT_AUDIENCE
+      # --- JWT CONFIGURATION ---
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REALM=${JWT_REALM}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
 
     restart: unless-stopped
 
