@@ -56,44 +56,48 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-          envs: |
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            JWT_REALM=${{ secrets.JWT_REALM }}
-            JWT_EXPIRATION_MS=${{ secrets.JWT_EXPIRATION_MS }}
-            JWT_ISSUER=${{ secrets.JWT_ISSUER }}
-            JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}
-
-            # Переменные для Docker Compose
-            DOCKER_USERNAME=${{ github.actor }} # Используем ваше имя пользователя GitHub
-            DOCKER_PAT=${{ secrets.GITHUB_TOKEN }} # Используем токен, созданный GHA
-
           script: |
-            echo "Starting deployment on VDS..."
+            echo "Starting deployment /root/ptf-backend on VDS..."
             
-            PROJECT_DIR="/root/ptf-backend" 
-            cd "$PROJECT_DIR" || exit 1 # Выходим при ошибке CD
+            PROJECT_DIR="/root/ptf-backend"
+            cd "$PROJECT_DIR" || exit 1
             
-            # 1. Авторизация в GHCR на VDS для скачивания образа (используя GITHUB_TOKEN)
+            # ----------------------------------------------------
+            # 1. ЭКСПОРТ КОНФИГУРАЦИИ Ktor/DB (для docker-compose)
+            # ----------------------------------------------------
+            
+            # ЭКСПОРТ ИЗ СЕКРЕТОВ (SECRETS)
+            export DB_USER="${{ secrets.DB_USER }}"
+            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+            export POSTGRES_PASSWORD="${{ secrets.DB_PASSWORD }}" 
+            export JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            
+            # ЭКСПОРТ ИЗ ПЕРЕМЕННЫХ (VARS)
+            export DB_NAME="${{ vars.DB_NAME }}"
+            export JWT_REALM="${{ vars.JWT_REALM }}"
+            export JWT_EXPIRATION_MS="${{ vars.JWT_EXPIRATION_MS }}"
+            export JWT_ISSUER="${{ vars.JWT_ISSUER }}"
+            export JWT_AUDIENCE="${{ vars.JWT_AUDIENCE }}"
+            
+            # 2. АВТОРИЗАЦИЯ В GHCR (Используем личный UPLOAD_TOKEN)
+            DOCKER_USER="${{ github.actor }}"
+            DOCKER_PASS="${{ secrets.UPLOAD_TOKEN }}"
+            
             echo "Authorizing Docker on VDS..."
-            echo "${DOCKER_PAT}" | docker login ghcr.io -u "${DOCKER_USERNAME}" --password-stdin
+            echo "${DOCKER_PASS}" | docker login ghcr.io -u "${DOCKER_USER}" --password-stdin
             
-            # 2. Установка переменных для docker-compose.yml
+            # 3. ЭКСПОРТ IMAGE TAG/REPO (для docker-compose)
             export IMAGE_TAG="${{ github.sha }}"
             export IMAGE_REPO="${{ github.repository }}"
             
-            # 3. Скачиваем новый образ (уже с чистым именем)
-            docker compose pull app
+            echo "Pulling image: ghcr.io/$IMAGE_REPO:$IMAGE_TAG"
             
-            # 4. Запускаем контейнеры (они используют все ENV, переданные в этом скрипте)
+            # 4. Скачиваем и запускаем контейнеры
+            docker compose pull app
             docker compose up -d
-
+            
             echo "Deployment finished. Checking application status."
-            # Опционально: вывод первых 10 строк лога для проверки соединения с БД
-            docker logs ptf_backend_app --tail 10
+            docker logs ptf_app --tail 20 
             
             # 5. Очистка старых образов
             docker image prune -f

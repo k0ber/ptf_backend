@@ -3,9 +3,9 @@ services:
     image: postgres:15-alpine
     container_name: postgres_db
     environment:
-      POSTGRES_DB: ptf_db        # Имя БД
-      POSTGRES_USER: ptf_db_user # Имя пользователя
-      POSTGRES_PASSWORD: "2354"  # Пароль
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -20,16 +20,16 @@ services:
     depends_on:
       - db
     environment:
-      DB_HOST: db               # Хост для БД - это имя сервиса 'db'
-      DB_NAME: ptf_db           # Имя БД (совпадает с POSTGRES_DB)
-      DB_USER: ptf_db_user
-      DB_PASSWORD: "2354"
+      - DB_HOST=db
+      - DB_NAME=ptf_db
+      - DB_USER
+      - DB_PASSWORD
 
-      JWT_SECRET: "IL0j3L34rnmqgKt-rWi%%1hJ0s3Li.u1sG_S4ndHyp3r9l"
-      JWT_REALM: "KtorRealm"
-      JWT_EXPIRATION_MS: 3600000
-      JWT_ISSUER: "http://0.0.0.0:8080/"
-      JWT_AUDIENCE: "ptf-users"
+      - JWT_SECRET
+      - JWT_REALM
+      - JWT_EXPIRATION_MS
+      - JWT_ISSUER
+      - JWT_AUDIENCE
 
     restart: unless-stopped
 
