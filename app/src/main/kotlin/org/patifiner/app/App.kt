@@ -5,8 +5,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule.Builder
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import io.ktor.server.netty.EngineMain
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.doublereceive.DoubleReceive
@@ -34,18 +33,13 @@ import org.patifiner.user.userModule
 import org.slf4j.Logger
 import org.slf4j.event.Level
 
-private const val HOST = "0.0.0.0"
-private const val PORT = 8080
-
 private val uploadConfig = UploadConfig(
     uploadPath = "files/uploads",
     baseUrl = "http://localhost:8080/files",
     maxFileSizeMB = 5,
 )
 
-fun main() {
-    embeddedServer(Netty, host = HOST, port = PORT, module = Application::module).start(wait = true)
-}
+fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 @Suppress("unused") // application.conf module
 internal fun Application.module() {
