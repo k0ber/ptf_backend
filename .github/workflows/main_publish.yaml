@@ -67,47 +67,45 @@ jobs:
 
           script: |
             set -euo pipefail
-            echo "Starting deployment /root/ptf-backend on VDS..."
+            echo "Starting work with /root/ptf-backend on VDS..."
             
             PROJECT_DIR="/root/ptf-backend"
             cd "$PROJECT_DIR" || exit 1
             
-            # ----------------------------------------------------
-            # 1. ЭКСПОРТ КОНФИГУРАЦИИ Ktor/DB (для docker-compose)
-            # ----------------------------------------------------
+            echo "Creating .env file with secrets..."
+            cat << EOF > .env
+            # DB Config (для postgresql и ktor)
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} 
+            DB_NAME=${{ vars.DB_NAME }}
             
-            # ЭКСПОРТ ИЗ СЕКРЕТОВ (SECRETS)
-            export DB_USER="${{ secrets.DB_USER }}"
-            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
-            export POSTGRES_PASSWORD="${{ secrets.DB_PASSWORD }}" 
-            export JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            # JWT Config (для Ktor)
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            JWT_REALM=${{ vars.JWT_REALM }}
+            JWT_EXPIRATION_MS=${{ vars.JWT_EXPIRATION_MS }}
+            JWT_ISSUER=${{ vars.JWT_ISSUER }}
+            JWT_AUDIENCE=${{ vars.JWT_AUDIENCE }}
             
-            # ЭКСПОРТ ИЗ ПЕРЕМЕННЫХ (VARS)
-            export DB_NAME="${{ vars.DB_NAME }}"
-            export JWT_REALM="${{ vars.JWT_REALM }}"
-            export JWT_EXPIRATION_MS="${{ vars.JWT_EXPIRATION_MS }}"
-            export JWT_ISSUER="${{ vars.JWT_ISSUER }}"
-            export JWT_AUDIENCE="${{ vars.JWT_AUDIENCE }}"
+            # Docker Image Config
+            IMAGE_TAG=${{ github.sha }}
+            IMAGE_REPO=${{ github.repository }}
+            EOF
             
-            # 2. АВТОРИЗАЦИЯ В GHCR (Используем личный UPLOAD_TOKEN)
+            # 2. GHCR authorisation
             DOCKER_USER="${{ github.actor }}"
             DOCKER_PASS="${{ secrets.UPLOAD_TOKEN }}"
             
             echo "Authorizing Docker on VDS..."
             echo "${DOCKER_PASS}" | docker login ghcr.io -u "${DOCKER_USER}" --password-stdin
             
-            # 3. ЭКСПОРТ IMAGE TAG/REPO (для docker-compose)
-            export IMAGE_TAG="${{ github.sha }}"
-            export IMAGE_REPO="${{ github.repository }}"
-            
+            # 3. download and run containers
             echo "Pulling image: ghcr.io/$IMAGE_REPO:$IMAGE_TAG"
-            
-            # 4. Скачиваем и запускаем контейнеры
             docker compose pull app
+            docker compose up -d
             
-            echo "--- START: ENVIRONMENT VARIABLE TEST ---"
+            echo "Deployment finished. Checking application status."
+            docker logs ptf_app --tail 20
             
-            # Запускаем контейнер Ktor (app) в одноразовом режиме, чтобы вывести все доступные ENV
-            docker compose run --rm -T app env
-            
-            echo "--- END: ENVIRONMENT VARIABLE TEST ---"
+            # 4. Очистка старых образов
+            docker image prune -f
