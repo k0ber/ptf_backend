@@ -107,7 +107,7 @@ jobs:
             # 3. download and run containers
             echo "Pulling image: ghcr.io/$IMAGE_REPO:$IMAGE_TAG"
             docker compose pull app
-            docker compose up -d
+            docker compose --env-file ./.env up -d
             
             echo "Deployment finished. Checking application status."
             docker logs ptf_app --tail 20
