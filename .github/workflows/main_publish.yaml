@@ -72,6 +72,11 @@ jobs:
             PROJECT_DIR="/root/ptf-backend"
             cd "$PROJECT_DIR" || exit 1
             
+            # --- экспорт переменных для этого скрипта
+            export IMAGE_TAG="${{ github.sha }}"
+            export IMAGE_REPO="${{ github.repository }}"
+            
+            # --- экспорт переменных для докера
             echo "Creating .env file with secrets..."
             cat << EOF > .env
             # DB Config (для postgresql и ktor)
