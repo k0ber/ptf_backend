@@ -104,10 +104,10 @@ jobs:
             
             # 4. Скачиваем и запускаем контейнеры
             docker compose pull app
-            docker compose up -d
             
-            echo "Deployment finished. Checking application status."
-            docker logs ptf_app --tail 20
+            echo "--- START: ENVIRONMENT VARIABLE TEST ---"
             
-            # 5. Очистка старых образов
-            docker image prune -f
+            # Запускаем контейнер Ktor (app) в одноразовом режиме, чтобы вывести все доступные ENV
+            docker compose run --rm -T app env
+            
+            echo "--- END: ENVIRONMENT VARIABLE TEST ---"
