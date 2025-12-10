@@ -21,17 +21,17 @@ services:
       - db
     environment:
       # --- DB CONFIGURATION ---
-      - DB_HOST=db
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
+      DB_HOST: db
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
 
       # --- JWT CONFIGURATION ---
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REALM=${JWT_REALM}
-      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
-      - JWT_ISSUER=${JWT_ISSUER}
-      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REALM: ${JWT_REALM}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
 
     restart: unless-stopped
 
