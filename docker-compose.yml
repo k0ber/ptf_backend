@@ -27,31 +27,6 @@ services:
       db:
         condition: service_healthy
 
-    # туду: удалить после дебага
-    command: >
-      sh -c '
-        echo "Starting DB health/DNS check...";
-      
-        # 1. ЖДЕМ ПОДТВЕРЖДЕНИЯ DNS (Ping)
-        until ping -c 1 db; do
-          echo "DNS resolution failed for db. Retrying...";
-          sleep 1;
-        done;
-      
-        echo "DNS for db resolved successfully!";
-      
-        # 2. ЖДЕМ ОТКРЫТИЯ ПОРТА (Netcat) - ЕСЛИ PING НЕ СРАБОТАЕТ, ИСПОЛЬЗУЙТЕ netcat
-        # until nc -z db 5432; do
-        #   echo "Port 5432 is not open on db. Retrying...";
-        #   sleep 1;
-        # done;
-      
-        # echo "Port 5432 is open!";
-      
-        echo "Starting Ktor application...";
-        exec /opt/app/bin/app
-      '
-
     environment:
       # --- DB CONFIGURATION ---
       DB_HOST: db
