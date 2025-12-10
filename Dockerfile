@@ -14,6 +14,9 @@ RUN ./gradlew :app:installDist --no-daemon --info
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /opt/app
 
+# туду: Устанавливаем net-tools для отладки DNS
+RUN apk add --no-cache iputils
+
 # 2. Копируем ВСЕ файлы, необходимые для запуска, из папки install/app
 # Эта папка содержит lib/, bin/ и ваш Plain JAR
 COPY --from=builder /app/app/build/install/app .
