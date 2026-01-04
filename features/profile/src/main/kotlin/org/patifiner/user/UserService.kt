@@ -1,7 +1,7 @@
 package org.patifiner.user
 
 import org.mindrot.jbcrypt.BCrypt
-import org.patifiner.auth.JwtInfo
+import org.patifiner.auth.JwtConfig
 import org.patifiner.auth.generateToken
 import org.patifiner.user.api.CreateUserRequest
 import org.patifiner.user.api.UserCreatedResponse
@@ -12,7 +12,7 @@ import org.patifiner.user.api.UserException.UserNotFoundByEmailException
 
 internal class UserService(
     private val userDao: UserDao,
-    private val jwtInfo: JwtInfo
+    private val jwtInfo: JwtConfig
 ) {
 
     suspend fun createUser(userInfo: CreateUserRequest): UserCreatedResponse {

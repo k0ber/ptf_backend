@@ -4,7 +4,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.server.config.ApplicationConfig
 import org.koin.dsl.module
 
-data class JwtInfo(
+data class JwtConfig(
     val secret: String,
     val audience: String,
     val realm: String,
@@ -15,8 +15,8 @@ data class JwtInfo(
 }
 
 fun authModule(config: ApplicationConfig) = module {
-    val jwtInfo = with(config.config("jwt")) {
-        JwtInfo(
+    val config = with(config.config("jwt")) {
+        JwtConfig(
             secret = property("secret").getString(),
             audience = property("audience").getString(),
             realm = property("realm").getString(),
@@ -24,5 +24,5 @@ fun authModule(config: ApplicationConfig) = module {
             expirationMs = property("expiration").getString().toLong()
         )
     }
-    single<JwtInfo> { jwtInfo }
+    single<JwtConfig> { config }
 }

@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16.9-alpine
+    container_name: ptf_db_local
+    environment:
+      POSTGRES_DB: ptf_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432" # Postgres should be installed locally
+
+  app:
+    build: .
+    container_name: ptf_app_local
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_NAME: ptf_db
+      DB_USER: user
+      DB_PASSWORD: password
+      JWT_SECRET: "local_secret_key_for_testing"
+      JWT_ISSUER: "http://localhost:8080/"
+      JWT_AUDIENCE: "ptf-client"
+      JWT_REALM: "KtorRealm"
+      JWT_EXPIRATION_MS: "3600000"
+      UPLOAD_PATH: "/app/uploads"
+      UPLOAD_BASE_URL: "http://localhost:8080/files"
+    volumes:
+      - "./local_uploads:/app/uploads"

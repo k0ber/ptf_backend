@@ -1,13 +1,9 @@
 package org.patifiner.upload
 
 import org.koin.dsl.module
-import org.patifiner.upload.api.UploadConfig
 
+val uploadModule = module {
 
-fun uploadModule(uploadConfig: UploadConfig) = module {
-
-    single {
-        UploadService(uploadConfig)
-    }
+    single { UploadService(get()) }
 
 }

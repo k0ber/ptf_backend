@@ -18,7 +18,7 @@ fun ApplicationCall.getCurrentUserId(): Long =
     principal<JWTPrincipal>()?.getClaim(USER_ID_FIELD_NAME, Long::class)
         ?: throw InvalidTokenException()
 
-fun generateToken(jwtInfo: JwtInfo, userId: Long): String {
+fun generateToken(jwtInfo: JwtConfig, userId: Long): String {
     return JWT.create()
         .withAudience(jwtInfo.audience)
         .withIssuer(jwtInfo.issuer)
@@ -27,7 +27,7 @@ fun generateToken(jwtInfo: JwtInfo, userId: Long): String {
         .sign(jwtInfo.algorithm)
 }
 
-fun Application.installAuth(info: JwtInfo) {
+fun Application.installAuth(info: JwtConfig) {
     install(Authentication) {
         jwt("auth-jwt") {
             verifier(

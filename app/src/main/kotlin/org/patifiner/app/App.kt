@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.Database
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import org.patifiner.auth.JwtInfo
+import org.patifiner.auth.JwtConfig
 import org.patifiner.auth.authModule
 import org.patifiner.auth.installAuth
 import org.patifiner.check.di.checkModule
@@ -25,19 +25,12 @@ import org.patifiner.search.api.searchRoutes
 import org.patifiner.search.searchModule
 import org.patifiner.topics.api.topicsRoute
 import org.patifiner.topics.topicsModule
-import org.patifiner.upload.api.UploadConfig
 import org.patifiner.upload.api.uploadRoutes
 import org.patifiner.upload.uploadModule
 import org.patifiner.user.api.userRoutes
 import org.patifiner.user.userModule
 import org.slf4j.Logger
 import org.slf4j.event.Level
-
-private val uploadConfig = UploadConfig(
-    uploadPath = "files/uploads",
-    baseUrl = "http://localhost:8080/files",
-    maxFileSizeMB = 5,
-)
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
@@ -54,20 +47,20 @@ internal fun Application.module() {
             userModule,
             topicsModule,
             searchModule,
-            uploadModule(uploadConfig)
+            uploadModule
         )
     }
 
-    val jwtInfo: JwtInfo by inject()
     val logger: Logger by inject()
-    val databaseInfo: DatabaseInfo by inject()
+    val jwtConfig: JwtConfig by inject()
+    val databaseConfig: DatabaseConfig by inject()
 
-    installAuth(jwtInfo)
+    installAuth(jwtConfig)
     installStatusPages(logger)
 
-    with(databaseInfo) {
+    with(databaseConfig) {
         logger.info("Connecting to database at $url")
-        Database.connect(url, driver, user, password) // NOTE: Реальная проверка соединения происходит здесь.
+        Database.connect(url, driver, user, password)
     }
 
     installJackson()

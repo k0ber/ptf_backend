@@ -1,47 +1,68 @@
 services:
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Автоматический редирект с http на https
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=admin@patifiner.ru"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    restart: unless-stopped
+
   db:
     image: postgres:16.9-alpine
     container_name: postgres_db
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 3s
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   app:
-    image: ghcr.io/${IMAGE_REPO:-k0ber/ptfbackend}:${IMAGE_TAG:-latest}
+    image: ghcr.io/${IMAGE_REPO}:${IMAGE_TAG:-latest}
     container_name: ptf_app
-    ports:
-      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ptf-app.rule=Host(`api.patifiner.ru`)"
+      - "traefik.http.routers.ptf-app.entrypoints=websecure"
+      - "traefik.http.routers.ptf-app.tls.certresolver=myresolver"
     environment:
-      # --- DB CONFIGURATION ---
       DB_HOST: db
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-
-      # --- JWT CONFIGURATION ---
       JWT_SECRET: ${JWT_SECRET}
-      JWT_REALM: ${JWT_REALM}
-      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
-      JWT_ISSUER: ${JWT_ISSUER}
-      JWT_AUDIENCE: ${JWT_AUDIENCE}
-
+      # Путь внутри контейнера для UploadService
+      UPLOAD_PATH: "/app/uploads"
+      # Базовый URL для формирования ссылок на картинки
+      UPLOAD_BASE_URL: "https://api.patifiner.ru/files"
+    volumes:
+      # Маппим папку с картинками на диск сервера
+      - "./uploads:/app/uploads"
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  letsencrypt:
