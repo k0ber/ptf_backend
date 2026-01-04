@@ -7,7 +7,6 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      # Автоматический редирект с http на https
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
@@ -16,6 +15,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      - DOCKER_API_VERSION=1.52
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -48,6 +49,8 @@ services:
       - "traefik.http.routers.ptf-app.rule=Host(`api.patifiner.ru`)"
       - "traefik.http.routers.ptf-app.entrypoints=websecure"
       - "traefik.http.routers.ptf-app.tls.certresolver=myresolver"
+      - "traefik.http.routers.ptf-app.tls=true"
+      - "traefik.http.services.ptf-app.loadbalancer.server.port=8080"
     environment:
       DB_HOST: db
       DB_NAME: ${DB_NAME}
@@ -61,7 +64,6 @@ services:
       UPLOAD_PATH: "/app/uploads"
       UPLOAD_BASE_URL: "https://api.patifiner.ru/files"
     volumes:
-      # Маппим папку с картинками на диск сервера
       - "./uploads:/app/uploads"
     restart: unless-stopped
 
