@@ -54,9 +54,11 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
-      # Путь внутри контейнера для UploadService
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      JWT_REALM: ${JWT_REALM}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
       UPLOAD_PATH: "/app/uploads"
-      # Базовый URL для формирования ссылок на картинки
       UPLOAD_BASE_URL: "https://api.patifiner.ru/files"
     volumes:
       # Маппим папку с картинками на диск сервера
