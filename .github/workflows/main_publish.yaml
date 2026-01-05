@@ -97,7 +97,7 @@ jobs:
             IMAGE_REPO=${{ github.repository }}
             
             # Traefick dashboard
-            DASHBOARD_ROOT_PWD=${{ secrets.DASHBOARD_ROOT_PWD }}
+            DASHBOARD_ROOT_PWD=${{ secrets.DASHBOARD_ROOT_PWD_ESCAPED }}
             EOF
             
             # 2. GHCR AUTH
