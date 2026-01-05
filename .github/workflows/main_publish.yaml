@@ -95,6 +95,9 @@ jobs:
             # Docker Image Config
             IMAGE_TAG=${{ github.sha }}
             IMAGE_REPO=${{ github.repository }}
+            
+            # Traefick dashboard
+            DASHBOARD_ROOT_PWD=${{ secrets.DASHBOARD_ROOT_PWD }}
             EOF
             
             # 2. GHCR authorisation
