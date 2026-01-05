@@ -72,14 +72,14 @@ jobs:
             PROJECT_DIR="/root/ptf-backend"
             cd "$PROJECT_DIR" || exit 1
             
-            # --- экспорт переменных для этого скрипта
+            # --- export image variables that we use later in this script
             export IMAGE_TAG="${{ github.sha }}"
             export IMAGE_REPO="${{ github.repository }}"
             
-            # --- экспорт переменных для докера
-            echo "Creating .env file with secrets..."
-            cat << EOF > .env
-            # DB Config (для postgresql и ktor)
+            # 1. CREATE .env FILE
+            echo "Creating .env file"
+            cat << 'EOF' > .env
+            # DB Config
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} 
@@ -100,14 +100,14 @@ jobs:
             DASHBOARD_ROOT_PWD=${{ secrets.DASHBOARD_ROOT_PWD }}
             EOF
             
-            # 2. GHCR authorisation
+            # 2. GHCR AUTH
             DOCKER_USER="${{ github.actor }}"
             DOCKER_PASS="${{ secrets.UPLOAD_TOKEN }}"
             
             echo "Authorizing Docker on VDS..."
             echo "${DOCKER_PASS}" | docker login ghcr.io -u "${DOCKER_USER}" --password-stdin
             
-            # 3. download and run containers
+            # 3. DOWNLOAD AND RUN CONTAINERS
             echo "Pulling image: ghcr.io/$IMAGE_REPO:$IMAGE_TAG"
             docker compose pull app
             docker compose --env-file ./.env up -d
@@ -115,5 +115,5 @@ jobs:
             echo "Deployment finished. Checking application status."
             docker logs ptf_app --tail 20
             
-            # 4. Очистка старых образов
+            # 4. CLEAN
             docker image prune -f
