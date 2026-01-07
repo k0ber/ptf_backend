@@ -8,6 +8,7 @@ import io.ktor.server.application.install
 import io.ktor.server.netty.EngineMain
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
@@ -65,6 +66,20 @@ internal fun Application.module() {
 
     installJackson()
     installDebugPlugins()
+
+    install(CORS) {
+        allowHost("patifiner.ru", schemes = listOf("https"))
+
+        allowHeader(io.ktor.http.HttpHeaders.Authorization)
+        allowHeader(io.ktor.http.HttpHeaders.ContentType)
+
+        allowMethod(io.ktor.http.HttpMethod.Options)
+        allowMethod(io.ktor.http.HttpMethod.Put)
+        allowMethod(io.ktor.http.HttpMethod.Delete)
+        allowMethod(io.ktor.http.HttpMethod.Patch)
+
+        allowCredentials = true
+    }
 
     routing {
         checkRoutes()
