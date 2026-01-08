@@ -1,51 +1,4 @@
 services:
-  traefik:
-    image: traefik:v3.6
-    container_name: traefik
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    command:
-      # Docker
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-
-      # HTTP -> HTTPS
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-
-      # Dashboard
-      - "--api.dashboard=true"
-      - "--api.insecure=false"
-
-      # SSL (Let's Encrypt)
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=admin@patifiner.ru"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-
-      # logs
-      - "--log.level=INFO"
-      - "--accesslog=true"
-
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./letsencrypt:/letsencrypt"
-    labels:
-      - "traefik.enable=true"
-      # Dashboard router
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.patifiner.ru`)"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
-      # Dashboard auth
-      - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=root:${DASHBOARD_ROOT_PWD}"
   db:
     image: postgres:16.9-alpine
     container_name: postgres_db
@@ -60,6 +13,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - backend_internal
     restart: unless-stopped
 
   app:
@@ -70,9 +25,12 @@ services:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      # Domain
       - "traefik.http.routers.ptf-app.rule=Host(`api.patifiner.ru`)"
       - "traefik.http.routers.ptf-app.entrypoints=websecure"
       - "traefik.http.routers.ptf-app.tls.certresolver=myresolver"
+      # Ktor port
       - "traefik.http.services.ptf-app.loadbalancer.server.port=8080"
     environment:
       DB_HOST: db
@@ -88,8 +46,15 @@ services:
       UPLOAD_BASE_URL: "https://api.patifiner.ru/files"
     volumes:
       - "./uploads:/app/uploads"
+    networks:
+      - web
+      - backend_internal
     restart: unless-stopped
 
 volumes:
   postgres_data:
-  letsencrypt:
+
+networks:
+  web:
+    external: true
+  backend_internal:
