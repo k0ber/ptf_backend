@@ -4,7 +4,4 @@ plugins {
 }
 
 dependencies {
-    api(libs.ktor.server.auth.jwt.jvm)
-    api(libs.ktor.server.auth.jvm)
-    implementation(projects.core.base)
 }

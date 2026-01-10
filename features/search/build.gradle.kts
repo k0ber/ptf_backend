@@ -4,6 +4,9 @@ plugins {
     id("buildlogic.kotlin-database-conventions")
 }
 dependencies {
-    implementation(projects.features.profile)
+    implementation(projects.features.topics)
+    implementation(projects.features.user)
     implementation(projects.core.auth)
+    implementation(projects.core.base)
+    implementation(projects.core.database)
 }

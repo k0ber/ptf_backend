@@ -15,11 +15,12 @@ dependencies {
 
     implementation(libs.exposed.core)
 
-    implementation(projects.core.auth)
+    implementation(projects.core.base)
     implementation(projects.core.auth)
     implementation(projects.features.check)
 
-    implementation(projects.features.profile)
+    implementation(projects.features.user)
+    implementation(projects.features.topics)
     implementation(projects.features.search)
     implementation(projects.features.upload)
 }

@@ -1,6 +1,8 @@
 package org.patifiner.auth.exceptions
 
-// todo: refactor exceptions
-sealed class AuthException(message: String) : RuntimeException(message) {
-    class InvalidTokenException() : AuthException("Invalid or expired token")
+import io.ktor.http.HttpStatusCode
+import org.patifiner.base.PatifinerException
+
+sealed class AuthException(message: String, code: String) : PatifinerException(message, code, HttpStatusCode.Unauthorized) {
+    class InvalidTokenException : AuthException("Invalid or expired token", "AUTH_INVALID_TOKEN")
 }

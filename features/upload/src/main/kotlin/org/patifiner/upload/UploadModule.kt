@@ -4,6 +4,6 @@ import org.koin.dsl.module
 
 val uploadModule = module {
 
-    single { UploadService(get()) }
+    single { UploadService(config = get(), logger = get()) }
 
 }

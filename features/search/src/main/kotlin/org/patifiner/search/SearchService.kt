@@ -1,11 +1,12 @@
 package org.patifiner.search
 
+import org.patifiner.database.TopicLevel
 import org.patifiner.search.api.PaginationRequest
-import org.patifiner.topics.TopicLevel
 import org.patifiner.topics.UserTopicDto
-import org.patifiner.topics.data.TopicDao
+import org.patifiner.topics.TopicDao
 import org.patifiner.user.UserInfoDto
-import org.patifiner.user.data.UserDao
+import org.patifiner.user.UserDao
+import org.patifiner.user.toDto
 
 internal class SearchService(
     private val userDao: UserDao,

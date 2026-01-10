@@ -8,10 +8,15 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(
     "app",
-    ":core:auth",
-    ":features:check",
-    ":features:profile",
-    ":features:search",
-    ":features:upload",
 
+    ":features:check",
+    ":features:search",
+    ":features:topics",
+    ":features:upload",
+    ":features:user",
+
+    ":core:base",
+    ":core:auth",
+    ":core:database",
+    ":core:postgres",
 )
