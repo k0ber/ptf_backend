@@ -7,6 +7,4 @@ plugins {
 dependencies {
     implementation(projects.core.auth)
     implementation(projects.core.base)
-    implementation(libs.mindrot.jbcrypt)
-    implementation(libs.fasterxml.jackson.yaml)
 }

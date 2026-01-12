@@ -10,6 +10,5 @@ dependencies {
     implementation(projects.core.base)
     implementation(projects.core.database)
     implementation(projects.core.postgres)
-    implementation(libs.mindrot.jbcrypt)
     implementation(libs.fasterxml.jackson.yaml)
 }
