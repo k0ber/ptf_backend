@@ -4,16 +4,19 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.patifiner.user.api.UserException.UserNotFoundByIdException
-import org.patifiner.database.UserTopicsTable
-import org.patifiner.user.api.CreateUserRequest
+import org.patifiner.database.CityEntity
 import org.patifiner.database.UserEntity
 import org.patifiner.database.UserTable
+import org.patifiner.database.UserTopicsTable
+import org.patifiner.user.api.CreateUserRequest
+import org.patifiner.user.api.UserException
+import org.patifiner.user.api.UserException.UserNotFoundByIdException
 
 interface UserDao {
     suspend fun existsByEmail(email: String): Boolean
     suspend fun create(userInfo: CreateUserRequest, hashedPassword: String): UserInfoDto
-    suspend fun findById(id: Long): UserEntity
+    @Throws(UserNotFoundByIdException::class)
+    suspend fun getById(id: Long): UserEntity
     suspend fun findByEmail(email: String): UserEntity?
     suspend fun findUsersByAnyTopics(
         topicIds: Collection<Long>,
@@ -24,6 +27,7 @@ interface UserDao {
 
     suspend fun updateAvatarUrl(userId: Long, avatarUrl: String?): UserInfoDto
     suspend fun updatePhotos(userId: Long, photos: List<String>): UserInfoDto
+    suspend fun updateCity(userId: Long, cityId: Long?): UserInfoDto
 }
 
 internal class ExposedUserDao : UserDao {
@@ -35,17 +39,21 @@ internal class ExposedUserDao : UserDao {
 
     override suspend fun create(userInfo: CreateUserRequest, hashedPassword: String): UserInfoDto =
         newSuspendedTransaction(Dispatchers.IO) {
-            val user = UserEntity.new { fromDto(userInfo, hashedPassword) }
+            val user = UserEntity.new { fromCreateRequest(userInfo, hashedPassword) }
             user.toDto()
         }
 
-    // todo: should throw inside or on the call site and nullable?
-    override suspend fun findById(id: Long): UserEntity =
+    /**
+     *  get метод в дао возвращает не налабл и может кинуть ошибку UserNotFoundByIdException если по айди ничего не найдётся
+     */
+    override suspend fun getById(id: Long): UserEntity =
         newSuspendedTransaction(Dispatchers.IO) {
-            UserEntity.find { UserTable.id eq id }.singleOrNull()
-                ?: throw UserNotFoundByIdException(id)
+            UserEntity.find { UserTable.id eq id }.singleOrNull() ?: throw UserNotFoundByIdException(id)
         }
 
+    /**
+     *  find в методе в дао указывает на налабл в возвращаемом типе
+     */
     override suspend fun findByEmail(email: String): UserEntity? =
         newSuspendedTransaction(Dispatchers.IO) {
             UserEntity.find { UserTable.email eq email }.singleOrNull()
@@ -88,6 +96,13 @@ internal class ExposedUserDao : UserDao {
         newSuspendedTransaction(Dispatchers.IO) {
             val user = UserEntity.findById(userId) ?: throw UserNotFoundByIdException(userId)
             user.photosList = photos
+            user.toDto()
+        }
+
+    override suspend fun updateCity(userId: Long, cityId: Long?): UserInfoDto =
+        newSuspendedTransaction(Dispatchers.IO) {
+            val user = UserEntity.findById(userId) ?: throw UserNotFoundByIdException(userId)
+            user.city = cityId?.let { CityEntity.findById(it) ?: throw UserException.CityNotFoundException(it) }
             user.toDto()
         }
 }

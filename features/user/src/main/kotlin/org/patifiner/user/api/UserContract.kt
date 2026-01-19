@@ -30,3 +30,5 @@ data class UpdateUserRequest(
 data class SetMainPhotoRequest(val url: String)
 
 data class DeletePhotoRequest(val url: String)
+
+data class UpdateCityRequest(val cityId: Long)

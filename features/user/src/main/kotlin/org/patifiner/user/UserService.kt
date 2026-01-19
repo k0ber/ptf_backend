@@ -9,6 +9,7 @@ import org.patifiner.user.api.UserException
 import org.patifiner.user.api.UserException.EmailAlreadyTakenException
 import org.patifiner.user.api.UserException.InvalidCredentialsException
 import org.patifiner.user.api.UserException.UserNotFoundByEmailException
+import org.patifiner.user.api.UserException.UserNotFoundByIdException
 
 private const val USER_PHOTO_LIMIT = 10
 
@@ -41,15 +42,15 @@ internal class UserService(
         return generateToken(jwtConfig, userEntity.id.value)
     }
 
-    suspend fun getUserInfo(userId: Long): UserInfoDto = userDao.findById(userId).toDto()
+    suspend fun getUserInfo(userId: Long): UserInfoDto = userDao.getById(userId)?.toDto()?: throw UserNotFoundByIdException(userId)
 
     suspend fun updateAvatarUrl(userId: Long, avatarUrl: String?): UserInfoDto {
-        userDao.findById(userId)
+        userDao.getById(userId)
         return userDao.updateAvatarUrl(userId, avatarUrl)
     }
 
     suspend fun addPhoto(userId: Long, photoUrl: String): UserInfoDto {
-        val user = userDao.findById(userId)
+        val user = userDao.getById(userId)
         val currentPhotos = user.photosList.toMutableList()
 
         if (currentPhotos.size >= USER_PHOTO_LIMIT) {
@@ -61,7 +62,7 @@ internal class UserService(
     }
 
     suspend fun removePhoto(userId: Long, photoUrl: String): String {
-        val user = userDao.findById(userId)
+        val user = userDao.getById(userId)?: throw UserNotFoundByIdException(userId)
         val currentPhotos = user.photosList.toMutableList()
 
         if (currentPhotos.remove(photoUrl)) {
@@ -76,5 +77,7 @@ internal class UserService(
     }
 
     suspend fun setMainPhoto(userId: Long, photoUrl: String): UserInfoDto = userDao.updateAvatarUrl(userId, photoUrl)
+
+    suspend fun updateCity(userId: Long, cityId: Long?): UserInfoDto = userDao.updateCity(userId, cityId)
 
 }

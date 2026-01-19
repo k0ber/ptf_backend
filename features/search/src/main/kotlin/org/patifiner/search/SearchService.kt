@@ -14,7 +14,7 @@ internal class SearchService(
 ) {
     suspend fun findTopicIdea(myUserId: Long): TopicIdeaDto {
         val myTopics = topicDao.getUserTopics(myUserId).toSet()
-        val myUserProfile = userDao.findById(myUserId)
+        val myUserProfile = userDao.getById(myUserId)
 
         if (myTopics.isEmpty()) {
             return TopicIdeaDto(
@@ -43,7 +43,7 @@ internal class SearchService(
 
         val candidateId = candidateIds.shuffled().first()
 
-        val candidateEntity = userDao.findById(candidateId)
+        val candidateEntity = userDao.getById(candidateId)
         val candidateTopics = topicDao.getUserTopics(candidateId)
 
         // ищем общий topicId

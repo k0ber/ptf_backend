@@ -10,38 +10,16 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.koin.ktor.ext.inject
 import org.patifiner.auth.JWT_AUTH
 import org.patifiner.auth.getCurrentUserId
-import org.patifiner.database.TopicsTable
-import org.patifiner.database.UserTopicsTable
 import org.patifiner.topics.TopicsService
 import org.slf4j.Logger
 
-private const val TOPICS_YAML = "/topics.yaml"
 
-fun Route.topicsRoute(scope: CoroutineScope) {
+fun Route.topicsRoutes() {
     val topicsService: TopicsService by inject()
     val logger: Logger by inject()
-
-    scope.launch(Dispatchers.IO) {
-        newSuspendedTransaction {
-            exec("CREATE EXTENSION IF NOT EXISTS pg_trgm") // required for search like
-            logger.info("PostgreSQL extension 'pg_trgm' ensured to be created.")
-
-            SchemaUtils.create(TopicsTable)
-            SchemaUtils.create(UserTopicsTable)
-        }
-
-        val resourceStream = object {}.javaClass.getResourceAsStream(TOPICS_YAML) ?: throw RuntimeException("topics.yaml not found in resources")
-        topicsService.importFromYaml(resourceStream.bufferedReader(Charsets.UTF_8).readText())
-        logger.info("Topics imported from $TOPICS_YAML")
-    }
 
     route("/topics") {
         authenticate(JWT_AUTH) {

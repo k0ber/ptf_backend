@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.kotlin.datetime.date
 
 object UserTable : LongIdTable("user") {
     val name = varchar("name", 50)
+    val cityId = reference("city_id", CitiesTable).nullable()
     val avatarUrl = varchar("avatar_url", 255).nullable()
     val photosString = text("photos").default("")
     val birthDate = date("birth_date").nullable()
@@ -19,6 +20,7 @@ class UserEntity(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<UserEntity>(UserTable)
 
     var name by UserTable.name
+    var city by CityEntity optionalReferencedOn UserTable.cityId
     var avatarUrl by UserTable.avatarUrl
     var photosString by UserTable.photosString
     var birthDate by UserTable.birthDate

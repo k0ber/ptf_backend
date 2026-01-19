@@ -1,4 +1,4 @@
-package org.patifiner.topics.api
+package org.patifiner.database
 
 data class TopicsYamlRoot(
     val locale: String = "en",

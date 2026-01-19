@@ -37,7 +37,7 @@ fun Route.uploadRoutes() {
                 multipart.forEachPart { part ->
                     if (part is PartData.FileItem) {
                         val bytes = withContext(Dispatchers.IO) {
-                            part.streamProvider().readBytes() // todo: эффективно для небольших файлов. Для очень больших файлов (более нескольких МБ), лучше использовать channel.copyTo(fileOutput)
+                            part.streamProvider().readBytes() // не используем channel.copyTo(fileOutput), т.к. для небольших файлов эффективнее readBytes
                         }
 
                         fileContent = bytes

@@ -13,6 +13,8 @@ class UserInfoDto(
     val photos: List<String> = emptyList(),
     val birthDate: LocalDate?,
     val email: String,
+    val cityId: Long? = null,
+    val cityName: String? = null
 )
 
 fun UserEntity.toDto(): UserInfoDto = UserInfoDto(
@@ -22,9 +24,11 @@ fun UserEntity.toDto(): UserInfoDto = UserInfoDto(
     photos = this.photosList,
     birthDate = this.birthDate?.toJavaLocalDate(),
     email = this.email,
+    cityId = this.city?.id?.value,
+    cityName = this.city?.name
 )
 
-fun UserEntity.fromDto(req: CreateUserRequest, hashedPassword: String) {
+fun UserEntity.fromCreateRequest(req: CreateUserRequest, hashedPassword: String) {
     name = req.name
     birthDate = req.birthDate?.toKotlinLocalDate()
     email = req.email

@@ -25,18 +25,11 @@ import org.patifiner.upload.UploadService
 import org.patifiner.user.UserService
 import org.slf4j.Logger
 
-fun Route.userRoutes(scope: CoroutineScope) {
+fun Route.userRoutes() {
 
     val userService: UserService by inject()
     val uploadService: UploadService by inject()
     val logger: Logger by inject()
-
-    // todo: перенести в отдельный DatabaseInitializer
-    scope.launch(Dispatchers.IO) {
-        newSuspendedTransaction {
-            SchemaUtils.create(UserTable)
-        }
-    }
 
     post("/user/create") {
         val request = call.receive<CreateUserRequest>()
@@ -100,6 +93,15 @@ fun Route.userRoutes(scope: CoroutineScope) {
             val request = call.receive<SetMainPhotoRequest>()
 
             val updatedUser = userService.setMainPhoto(userId, request.url)
+            call.respond(updatedUser)
+        }
+
+        put("/user/me/city") {
+            val userId = call.getCurrentUserId()
+            val request = call.receive<UpdateCityRequest>()
+            val cityId = request.cityId
+
+            val updatedUser = userService.updateCity(userId, cityId)
             call.respond(updatedUser)
         }
     }

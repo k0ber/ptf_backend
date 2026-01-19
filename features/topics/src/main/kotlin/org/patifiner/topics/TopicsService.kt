@@ -1,19 +1,8 @@
 package org.patifiner.topics
 
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.patifiner.database.TopicEntity
-import org.patifiner.database.TopicsTable
 import org.patifiner.topics.api.AddUserTopicsRequest
 import org.patifiner.topics.api.CreateTopicRequest
-import org.patifiner.topics.api.TopicYaml
-import org.patifiner.topics.api.TopicsYamlRoot
-import java.text.Normalizer
 
 class TopicsService(private val topicDao: TopicDao) {
 
@@ -32,43 +21,4 @@ class TopicsService(private val topicDao: TopicDao) {
 
     suspend fun getTopicsTree(): List<TopicDto> = topicDao.getTopicsTree()
 
-    // ---------- IMPORT ----------
-    suspend fun importFromYaml(yamlText: String, overwrite: Boolean = true) {
-        val mapper = ObjectMapper(YAMLFactory()).registerModule(KotlinModule.Builder().build())
-        val root: TopicsYamlRoot = mapper.readValue(yamlText)
-
-        newSuspendedTransaction {
-            fun insertRecursively(node: TopicYaml, parent: TopicEntity? = null) {
-                val existing = TopicEntity.find { (TopicsTable.slug eq (node.slug ?: "")) and (TopicsTable.locale eq root.locale) }.firstOrNull()
-
-                val topic = existing ?: TopicEntity.new {
-                    name = node.name
-                    slug = node.slug ?: node.name.slugify()
-                    description = node.description
-                    tags = node.tags?.joinToString(",")
-                    icon = node.name.take(2)
-                    locale = root.locale
-                    this.parent = parent
-                }
-
-                node.children?.forEach { insertRecursively(it, topic) }
-            }
-
-            root.topics.forEach { insertRecursively(it) }
-        }
-    }
-
-    private fun String.slugify(): String {
-        // Убираем emoji и спецсимволы, оставляем только буквы/цифры/пробелы/дефисы
-        val normalized = Normalizer.normalize(this, Normalizer.Form.NFD)
-            .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
-            .replace("[^\\p{L}\\p{Nd}\\s-]".toRegex(), "") // оставляем буквы, цифры, пробелы и дефисы
-            .trim()
-            .lowercase()
-            .replace("\\s+".toRegex(), "-") // заменяем пробелы на дефисы
-            .replace("-+".toRegex(), "-")   // сжимаем повторяющиеся дефисы
-
-        // Обрезаем, чтобы slug не был слишком длинным
-        return normalized.take(64)
-    }
 }

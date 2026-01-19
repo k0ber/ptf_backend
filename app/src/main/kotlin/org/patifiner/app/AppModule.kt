@@ -2,6 +2,7 @@ package org.patifiner.app
 
 import io.ktor.server.config.ApplicationConfig
 import org.koin.dsl.module
+import org.patifiner.database.DatabaseInitializer
 import org.patifiner.upload.api.UploadConfig
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -15,6 +16,7 @@ internal data class DatabaseConfig(
 
 internal fun appModule(config: ApplicationConfig) = module {
     single<Logger> { LoggerFactory.getLogger("App") }
+    single { DatabaseInitializer(get()) }
     single<DatabaseConfig> {
         with(config.config("database")) {
             DatabaseConfig(
