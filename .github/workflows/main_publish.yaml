@@ -96,10 +96,12 @@ jobs:
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             JWT_REALM=${{ vars.JWT_REALM }}
             JWT_EXPIRATION_MS=${{ vars.JWT_EXPIRATION_MS }}
+            JWT_REFRESH_EXPIRATION_MS=${{ vars.JWT_REFRESH_EXPIRATION_MS }}
             JWT_ISSUER=${{ vars.JWT_ISSUER }}
             JWT_AUDIENCE=${{ vars.JWT_AUDIENCE }}
+            UPLOAD_BASE_URL=${{ vars.UPLOAD_BASE_URL }}
             
-            # Docker Image Config
+            # DockerImage config
             IMAGE_TAG=${{ github.sha }}
             IMAGE_REPO=${{ github.repository }}
             

@@ -2,10 +2,10 @@ package org.patifiner.user
 
 import org.mindrot.jbcrypt.BCrypt
 import org.patifiner.auth.JwtConfig
+import org.patifiner.auth.TokenType
 import org.patifiner.auth.generateToken
-import org.patifiner.user.api.CreateUserRequest
-import org.patifiner.user.api.UserCreatedResponse
-import org.patifiner.user.api.UserException
+import org.patifiner.auth.verifyRefreshToken
+import org.patifiner.user.api.*
 import org.patifiner.user.api.UserException.EmailAlreadyTakenException
 import org.patifiner.user.api.UserException.InvalidCredentialsException
 import org.patifiner.user.api.UserException.UserNotFoundByEmailException
@@ -28,18 +28,30 @@ internal class UserService(
 
         return UserCreatedResponse(
             userInfo = createdUser,
-            token = generateToken(jwtConfig, createdUser.id)
+            token = generateTokenPair(createdUser.id)
         )
     }
 
-    suspend fun requestToken(email: String, password: String): String {
+    suspend fun requestToken(email: String, password: String): TokenResponse {
         val userEntity = userDao.findByEmail(email) ?: throw UserNotFoundByEmailException(email)
 
         if (!BCrypt.checkpw(password, userEntity.password)) {
             throw InvalidCredentialsException()
         }
 
-        return generateToken(jwtConfig, userEntity.id.value)
+        return generateTokenPair(userEntity.id.value)
+    }
+
+    fun refreshToken(refreshToken: String): TokenResponse {
+        val userId = verifyRefreshToken(jwtConfig, refreshToken)
+        return generateTokenPair(userId)
+    }
+
+    private fun generateTokenPair(userId: Long): TokenResponse {
+        return TokenResponse(
+            accessToken = generateToken(jwtConfig, userId, TokenType.ACCESS),
+            refreshToken = generateToken(jwtConfig, userId, TokenType.REFRESH)
+        )
     }
 
     suspend fun getUserInfo(userId: Long): UserInfoDto = userDao.getById(userId)?.toDto()?: throw UserNotFoundByIdException(userId)
@@ -62,7 +74,7 @@ internal class UserService(
     }
 
     suspend fun removePhoto(userId: Long, photoUrl: String): String {
-        val user = userDao.getById(userId)?: throw UserNotFoundByIdException(userId)
+        val user = userDao.getById(userId)
         val currentPhotos = user.photosList.toMutableList()
 
         if (currentPhotos.remove(photoUrl)) {

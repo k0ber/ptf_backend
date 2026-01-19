@@ -42,10 +42,11 @@ services:
       JWT_AUDIENCE: ${JWT_AUDIENCE}
       JWT_REALM: ${JWT_REALM}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS}
       VERSION_NAME: ${VERSION_NAME}
       VERSION_CODE: ${VERSION_CODE}
       UPLOAD_PATH: "/app/uploads"
-      UPLOAD_BASE_URL: "https://api.patifiner.ru/files"
+      UPLOAD_BASE_URL: ${UPLOAD_BASE_URL}
     volumes:
       - "./uploads:/app/uploads"
     networks:

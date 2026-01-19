@@ -9,20 +9,22 @@ data class JwtConfig(
     val audience: String,
     val realm: String,
     val issuer: String,
-    val expirationMs: Long
+    val accessTokenExpirationMs: Long,
+    val refreshTokenExpirationMs: Long
 ) {
     val algorithm: Algorithm = Algorithm.HMAC256(secret)
 }
 
 fun authModule(config: ApplicationConfig) = module {
-    val config = with(config.config("jwt")) {
+    val jwtConfig = with(config.config("jwt")) {
         JwtConfig(
             secret = property("secret").getString(),
             audience = property("audience").getString(),
             realm = property("realm").getString(),
             issuer = property("issuer").getString(),
-            expirationMs = property("expiration").getString().toLong()
+            accessTokenExpirationMs = property("expiration").getString().toLong(),
+            refreshTokenExpirationMs = propertyOrNull("refreshExpiration")?.getString()?.toLong() ?: 2592000000L // 30 days
         )
     }
-    single<JwtConfig> { config }
+    single<JwtConfig> { jwtConfig }
 }

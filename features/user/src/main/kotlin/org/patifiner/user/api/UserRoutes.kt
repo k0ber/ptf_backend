@@ -11,16 +11,10 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.koin.ktor.ext.inject
 import org.patifiner.auth.JWT_AUTH
 import org.patifiner.auth.getCurrentUserId
 import org.patifiner.base.readRawFile
-import org.patifiner.database.UserTable
 import org.patifiner.upload.UploadService
 import org.patifiner.user.UserService
 import org.slf4j.Logger
@@ -32,22 +26,28 @@ fun Route.userRoutes() {
     val logger: Logger by inject()
 
     post("/user/create") {
+        logger.info("new user request")
         val request = call.receive<CreateUserRequest>()
-        logger.info("request: $request")
         val response: UserCreatedResponse = userService.createUser(request)
         call.respond(response)
     }
 
     post("/user/login") {
         val request = call.receive<TokenRequest>()
-        val token = userService.requestToken(request.email, request.password)
-        call.respond(TokenResponse(token))
+        val tokenResponse = userService.requestToken(request.email, request.password)
+        call.respond(tokenResponse)
+    }
+
+    post("/user/refresh") {
+        val request = call.receive<RefreshTokenRequest>()
+        val tokenResponse = userService.refreshToken(request.refreshToken)
+        call.respond(tokenResponse)
     }
 
     authenticate(JWT_AUTH) {
         get("/user/me") {
-            val myUserInd = call.getCurrentUserId()
-            val myUserInfo = userService.getUserInfo(myUserInd)
+            val myUserId = call.getCurrentUserId()
+            val myUserInfo = userService.getUserInfo(myUserId)
             call.respond(myUserInfo)
         }
 

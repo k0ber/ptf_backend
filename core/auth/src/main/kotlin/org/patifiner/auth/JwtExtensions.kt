@@ -13,26 +13,47 @@ import java.util.Date
 
 const val JWT_AUTH = "auth-jwt"
 private const val USER_ID_FIELD_NAME = "id"
+private const val TOKEN_TYPE_FIELD_NAME = "type"
+
+enum class TokenType { ACCESS, REFRESH }
 
 fun ApplicationCall.getCurrentUserId(): Long =
     principal<JWTPrincipal>()?.getClaim(USER_ID_FIELD_NAME, Long::class) ?: throw AuthException.InvalidTokenException()
 
-fun generateToken(jwtConfig: JwtConfig, userId: Long): String {
+fun generateToken(jwtConfig: JwtConfig, userId: Long, type: TokenType = TokenType.ACCESS): String {
+    val expiration = if (type == TokenType.ACCESS) jwtConfig.accessTokenExpirationMs else jwtConfig.refreshTokenExpirationMs
     return JWT.create()
         .withAudience(jwtConfig.audience)
         .withIssuer(jwtConfig.issuer)
         .withClaim(USER_ID_FIELD_NAME, userId)
-        .withExpiresAt(Date(System.currentTimeMillis() + jwtConfig.expirationMs))
+        .withClaim(TOKEN_TYPE_FIELD_NAME, type.name)
+        .withExpiresAt(Date(System.currentTimeMillis() + expiration))
         .sign(jwtConfig.algorithm)
+}
+
+fun verifyRefreshToken(jwtConfig: JwtConfig, token: String): Long {
+    return try {
+        val verifier = JWT.require(jwtConfig.algorithm)
+            .withAudience(jwtConfig.audience)
+            .withIssuer(jwtConfig.issuer)
+            .withClaim(TOKEN_TYPE_FIELD_NAME, TokenType.REFRESH.name)
+            .build()
+        val decoded = verifier.verify(token)
+        decoded.getClaim(USER_ID_FIELD_NAME).asLong() ?: throw AuthException.InvalidRefreshTokenException()
+    } catch (e: Exception) {
+        // todo: log exception if you return module exception
+        throw AuthException.InvalidRefreshTokenException()
+    }
 }
 
 fun Application.installAuth(config: JwtConfig) {
     install(Authentication) {
-        jwt("auth-jwt") {
+        jwt(JWT_AUTH) {
             verifier(
                 JWT.require(config.algorithm)
                     .withAudience(config.audience)
                     .withIssuer(config.issuer)
+                    .withClaim(TOKEN_TYPE_FIELD_NAME, TokenType.ACCESS.name)
                     .build()
             )
             realm = config.realm
