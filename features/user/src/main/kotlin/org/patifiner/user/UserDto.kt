@@ -1,8 +1,9 @@
 package org.patifiner.user
 
 import kotlinx.datetime.toJavaLocalDate
-import kotlinx.datetime.toKotlinLocalDate
+import org.patifiner.database.Gender
 import org.patifiner.database.UserEntity
+import org.patifiner.database.UserLanguage
 import org.patifiner.user.api.CreateUserRequest
 import java.time.LocalDate
 
@@ -14,7 +15,9 @@ class UserInfoDto(
     val birthDate: LocalDate?,
     val email: String,
     val cityId: Long? = null,
-    val cityName: String? = null
+    val cityName: String? = null,
+    val gender: Gender = Gender.NOT_SPECIFIED,
+    val languages: List<UserLanguage> = emptyList()
 )
 
 fun UserEntity.toDto(): UserInfoDto = UserInfoDto(
@@ -25,12 +28,13 @@ fun UserEntity.toDto(): UserInfoDto = UserInfoDto(
     birthDate = this.birthDate?.toJavaLocalDate(),
     email = this.email,
     cityId = this.city?.id?.value,
-    cityName = this.city?.name
+    cityName = this.city?.name,
+    gender = this.gender,
+    languages = this.languages
 )
 
 fun UserEntity.fromCreateRequest(req: CreateUserRequest, hashedPassword: String) {
     name = req.name
-    birthDate = req.birthDate?.toKotlinLocalDate()
     email = req.email
     password = hashedPassword
 }

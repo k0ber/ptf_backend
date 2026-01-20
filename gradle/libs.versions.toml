@@ -1,6 +1,5 @@
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "1.9.0" }
-#kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "1.9.0" }
 
 [versions]
 kotlin-gradle-plugin = "2.2.0"
@@ -39,6 +38,7 @@ exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "e
 exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
 exposed-kotlin-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+exposed-json = { module = "org.jetbrains.exposed:exposed-json", version.ref = "exposed" }
 hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 
