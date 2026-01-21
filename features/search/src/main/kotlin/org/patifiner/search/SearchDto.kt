@@ -2,11 +2,11 @@ package org.patifiner.search
 
 import org.patifiner.topics.TopicDto
 import org.patifiner.topics.UserTopicDto
-import org.patifiner.user.UserInfoDto
+import org.patifiner.user.UserDto
 
 
 data class UserProfileDto(
-    val userInfo: UserInfoDto,
+    val userInfo: UserDto,
     val userTopics: Set<UserTopicDto>
 )
 

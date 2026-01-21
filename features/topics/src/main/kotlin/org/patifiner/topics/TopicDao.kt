@@ -2,17 +2,24 @@ package org.patifiner.topics
 
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.dao.with
+import org.jetbrains.exposed.sql.Random
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.patifiner.database.TopicEntity
-import org.patifiner.database.TopicsTable
-import org.patifiner.database.UserEntity
-import org.patifiner.database.UserTable
-import org.patifiner.database.UserTopicEntity
-import org.patifiner.database.UserTopicsTable
+import org.patifiner.base.PagedRequest
+import org.patifiner.base.calculateOffset
+import org.patifiner.database.tables.TopicEntity
+import org.patifiner.database.tables.TopicsTable
+import org.patifiner.database.tables.UserEntity
+import org.patifiner.database.tables.UserTable
+import org.patifiner.database.tables.UserTopicEntity
+import org.patifiner.database.tables.UserTopicsTable
 import org.patifiner.postgres.similarity
 import org.patifiner.postgres.trgmSearch
 import org.patifiner.topics.api.AddUserTopicRequest
@@ -27,12 +34,8 @@ interface TopicDao {
     suspend fun removeUserTopics(userId: Long, topicIds: List<Long>): Long
     suspend fun getUserTopics(userId: Long): Set<UserTopicDto>
     suspend fun getTopicsTree(): List<TopicDto>
-    suspend fun findUsersByAnyTopics(
-        topicIds: Collection<Long>,
-        limit: Int,
-        offset: Int,
-        excludeUserId: Long = -1L
-    ): List<Long>
+    suspend fun findUserIdsByAnyTopics(topicIds: Collection<Long>, excludeUserId: Long, pagedRequest: PagedRequest): List<Long>
+    suspend fun getRandomUserIdByAnyTopics(topicIds: Collection<Long>, excludeUserId: Long): Long?
 }
 
 class ExposedTopicDao : TopicDao {
@@ -101,7 +104,9 @@ class ExposedTopicDao : TopicDao {
                         (UserTopicsTable.topic inList topicIds.map { EntityID(it, TopicsTable) })
             }
             val count = toDelete.count()
-            toDelete.forEach { it.delete() }
+            UserTopicsTable.deleteWhere {
+                (user eq EntityID(userId, UserTable)) and (topic inList topicIds)
+            }
             count
         }
 
@@ -114,31 +119,25 @@ class ExposedTopicDao : TopicDao {
 
     override suspend fun getTopicsTree(): List<TopicDto> =
         newSuspendedTransaction(Dispatchers.IO) {
-            val allTopicEntities = TopicEntity.all()
-            val allDtos = allTopicEntities.map { it.toDto() }
-//            val dtoMap = allDtos.associateBy { it.id }.toMutableMap()
+            val allEntities = TopicEntity.all().with(TopicEntity::parent)
+
+            val allDtos = allEntities.map { it.toDto() }
             val groupedByParent = allDtos.groupBy { it.parentId }
 
-            val finalDtos = allDtos.map { currentDto ->
-                val directChildren = groupedByParent[currentDto.id].orEmpty()
-                val childrenIds = directChildren.map { it.id }
-                currentDto.copy(childrenIds = childrenIds)
+            allDtos.map { currentDto ->
+                val childrenIds = groupedByParent[currentDto.id]?.map { it.id } ?: emptyList()
+                if (childrenIds.isNotEmpty()) currentDto.copy(childrenIds = childrenIds) else currentDto
             }
-            finalDtos
         }
 
-    override suspend fun getBySlug(slug: String): TopicDto? =
-        newSuspendedTransaction(Dispatchers.IO) {
-            TopicEntity.find { TopicsTable.slug eq slug }.firstOrNull()?.toDto()
-        }
-
-    override suspend fun findUsersByAnyTopics(
+    override suspend fun findUserIdsByAnyTopics(
         topicIds: Collection<Long>,
-        limit: Int,
-        offset: Int,
-        excludeUserId: Long
-    ): List<Long> = newSuspendedTransaction {
+        excludeUserId: Long,
+        pagedRequest: PagedRequest
+    ): List<Long> = newSuspendedTransaction(Dispatchers.IO) {
         if (topicIds.isEmpty()) return@newSuspendedTransaction emptyList()
+
+        val offsetValue = calculateOffset(pagedRequest.page, pagedRequest.perPage)
 
         UserTopicsTable
             .slice(UserTopicsTable.user)
@@ -147,8 +146,31 @@ class ExposedTopicDao : TopicDao {
                         (UserTopicsTable.user neq excludeUserId)
             }
             .groupBy(UserTopicsTable.user)
-            .limit(n = limit, offset = offset.toLong())
+            .limit(n = pagedRequest.perPage, offset = offsetValue)
             .map { it[UserTopicsTable.user].value }
+    }
+
+    override suspend fun getBySlug(slug: String): TopicDto? =
+        newSuspendedTransaction(Dispatchers.IO) {
+            TopicEntity.find { TopicsTable.slug eq slug }.firstOrNull()?.toDto()
+        }
+
+    override suspend fun getRandomUserIdByAnyTopics(
+        topicIds: Collection<Long>,
+        excludeUserId: Long
+    ): Long? = newSuspendedTransaction(Dispatchers.IO) {
+        if (topicIds.isEmpty()) return@newSuspendedTransaction null
+
+        UserTopicsTable
+            .slice(UserTopicsTable.user)
+            .select {
+                (UserTopicsTable.topic inList topicIds) and (UserTopicsTable.user neq excludeUserId)
+            }
+            .groupBy(UserTopicsTable.user)
+            .orderBy(Random())
+            .limit(1)
+            .map { it[UserTopicsTable.user].value }
+            .singleOrNull()
     }
 
 }

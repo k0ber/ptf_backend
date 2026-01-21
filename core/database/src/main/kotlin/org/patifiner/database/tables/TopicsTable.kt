@@ -1,4 +1,4 @@
-package org.patifiner.database
+package org.patifiner.database.tables
 
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -27,24 +27,4 @@ class TopicEntity(id: EntityID<Long>) : LongEntity(id) {
     val children by TopicEntity optionalReferrersOn TopicsTable.parent
 
     var locale by TopicsTable.locale
-}
-
-object UserTopicsTable : LongIdTable("user_topics") {
-    val user = reference("user_id", UserTable)
-    val topic = reference("topic_id", TopicsTable)
-    val level = enumerationByName("level", 20, TopicLevel::class)
-    val description = varchar("description", 250).nullable()
-
-    init {
-        uniqueIndex("ux_user_topic", user, topic)
-    }
-}
-
-class UserTopicEntity(id: EntityID<Long>) : LongEntity(id) {
-    companion object : LongEntityClass<UserTopicEntity>(UserTopicsTable)
-
-    var user by UserEntity referencedOn UserTopicsTable.user
-    var topic by TopicEntity referencedOn UserTopicsTable.topic
-    var level by UserTopicsTable.level
-    var description by UserTopicsTable.description
 }

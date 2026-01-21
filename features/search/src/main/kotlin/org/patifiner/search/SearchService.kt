@@ -1,19 +1,19 @@
 package org.patifiner.search
 
-import org.patifiner.database.TopicLevel
-import org.patifiner.search.api.PaginationRequest
-import org.patifiner.topics.UserTopicDto
+import org.patifiner.base.PagedRequest
+import org.patifiner.database.enums.TopicLevel
 import org.patifiner.topics.TopicDao
-import org.patifiner.user.UserInfoDto
+import org.patifiner.topics.UserTopicDto
 import org.patifiner.user.UserDao
+import org.patifiner.user.UserDto
 import org.patifiner.user.toDto
 
 internal class SearchService(
     private val userDao: UserDao,
     private val topicDao: TopicDao
 ) {
-    suspend fun findTopicIdea(myUserId: Long): TopicIdeaDto {
-        val myTopics = topicDao.getUserTopics(myUserId).toSet()
+    suspend fun findTopicIdea(myUserId: Long): TopicIdeaDto? {
+        val myTopics = topicDao.getUserTopics(myUserId)
         val myUserProfile = userDao.getById(myUserId)
 
         if (myTopics.isEmpty()) {
@@ -24,81 +24,61 @@ internal class SearchService(
             )
         }
 
-        val candidateIds = topicDao
-            .findUsersByAnyTopics(
-                topicIds = myTopics.map { it.topic.id },
-                limit = 50,
-                offset = 0,
-                excludeUserId = -1L
-            )
-            .filter { it != myUserId }
+        val myTopicIds = myTopics.map { it.topic.id }
 
-        if (candidateIds.isEmpty()) {
-            return TopicIdeaDto(
-                person = UserProfileDto(myUserProfile.toDto(), myTopics),
-                topic = topicDao.getTopicsTree().first(),
-                idea = getIdeaForNoCandidates()
-            )
-        }
+        // 1. Пытаемся найти ОДНОГО случайного человека с общим топиком
+        val candidateId = topicDao.getRandomUserIdByAnyTopics(
+            topicIds = myTopicIds,
+            excludeUserId = myUserId
+        )
 
-        val candidateId = candidateIds.shuffled().first()
+        // 2. Если никого нет — возвращаем null.
+        // Фронт покажет "Идей пока нет, мы маякнем тебе нотификацией"
+        if (candidateId == null) return null
 
         val candidateEntity = userDao.getById(candidateId)
         val candidateTopics = topicDao.getUserTopics(candidateId)
 
-        // ищем общий topicId
-        val commonTopicId = myTopics.map { it.topic.id }.shuffled().first()
-        val candidateByTopicId = candidateTopics.associateBy { it.topic.id }
+        // 3. Ищем общие топики
+        val candidateTopicIds = candidateTopics.map { it.topic.id }.toSet()
+        val commonTopicIds = myTopicIds.intersect(candidateTopicIds)
 
-        val myTopic = myTopics.first { it.topic.id == commonTopicId }
-        val candidateTopic = candidateByTopicId.getValue(commonTopicId)
+        // Выбираем случайный из общих
+        val chosenTopicId = commonTopicIds.random()
 
-        val ideaText = getIdeaText(
-            myInfo = myUserProfile.toDto(),
-            myTopic = myTopic,
-            personInfo = candidateEntity.toDto(),
-            personTopic = candidateTopic
-        )
+        val myTopic = myTopics.first { it.topic.id == chosenTopicId }
+        val candidateTopic = candidateTopics.first { it.topic.id == chosenTopicId }
 
         return TopicIdeaDto(
-            person = UserProfileDto(
-                userInfo = candidateEntity.toDto(),
-                userTopics = candidateTopics
-            ),
+            person = UserProfileDto(candidateEntity.toDto(), candidateTopics),
             topic = myTopic.topic,
-            idea = ideaText
+            idea = getIdeaText(myUserProfile.toDto(), myTopic, candidateEntity.toDto(), candidateTopic)
         )
     }
 
-    suspend fun findUsers(
-        myId: Long,
-        paging: PaginationRequest
-    ): Set<UserInfoDto> {
-        // Собираем мои topicId
-        val myTopics = topicDao.getUserTopics(myId)          // Set<UserTopicDto>
-        if (myTopics.isEmpty()) return emptySet()
+    suspend fun findUsers(myId: Long, req: PagedRequest): List<UserDto> {
+        val myTopics = topicDao.getUserTopics(myId)
+        if (myTopics.isEmpty()) return emptyList()
 
-        check(paging.limit in 1..100) { "Invalid limit param" }
-        check(paging.offset >= 0) { "Invalid offset param" }
+        val topicIds = myTopics.map { it.topic.id }
 
-        val topicIds = myTopics.map { it.topic.id }.toSet()
-        return userDao.findUsersByAnyTopics(
+        val userIds = topicDao.findUserIdsByAnyTopics(
             topicIds = topicIds,
             excludeUserId = myId,
-            limit = paging.limit,
-            offset = paging.offset
+            pagedRequest = req
         )
+
+        return userDao.getUsersByIds(userIds)
     }
 
 // -------------------- helpers --------------------
 
     fun getIdeaForEmptyTopics() = "Добавьте себе хотя бы один топик !!"
-    fun getIdeaForNoCandidates() = "У вас уникальные интересы, ни у кого таких нет, вы прекрасны !!"
 
     fun getIdeaText(
-        myInfo: UserInfoDto,
+        myInfo: UserDto,
         myTopic: UserTopicDto,
-        personInfo: UserInfoDto,
+        personInfo: UserDto,
         personTopic: UserTopicDto
     ): String {
         val commonTopicName = myTopic.topic.name

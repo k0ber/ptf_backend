@@ -1,4 +1,4 @@
-package org.patifiner.database
+package org.patifiner.database.enums
 
 enum class TopicLevel {
     NONE,

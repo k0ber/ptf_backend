@@ -1,6 +1,6 @@
 package org.patifiner.topics.api
 
-import org.patifiner.database.TopicLevel
+import org.patifiner.database.enums.TopicLevel
 
 data class CreateTopicRequest(
     val name: String,

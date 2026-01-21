@@ -1,8 +1,8 @@
 package org.patifiner.topics
 
-import org.patifiner.database.TopicEntity
-import org.patifiner.database.TopicLevel
-import org.patifiner.database.UserTopicEntity
+import org.patifiner.database.tables.TopicEntity
+import org.patifiner.database.enums.TopicLevel
+import org.patifiner.database.tables.UserTopicEntity
 
 data class TopicDto(
     val locale: String,

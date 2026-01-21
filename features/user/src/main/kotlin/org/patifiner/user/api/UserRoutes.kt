@@ -54,10 +54,7 @@ fun Route.userRoutes() {
         put("/user/update") {
             val userId = call.getCurrentUserId()
             val request = call.receive<UpdateUserRequest>()
-            val updatedUser = userService.updateAvatarUrl(
-                userId = userId,
-                avatarUrl = request.avatarUrl
-            )
+            val updatedUser = userService.updateProfile(userId, request)
             call.respond(updatedUser)
         }
 
@@ -91,17 +88,14 @@ fun Route.userRoutes() {
         put("/user/me/avatar") {
             val userId = call.getCurrentUserId()
             val request = call.receive<SetMainPhotoRequest>()
-
-            val updatedUser = userService.setMainPhoto(userId, request.url)
+            val updatedUser = userService.updateAvatar(userId, request.url)
             call.respond(updatedUser)
         }
 
         put("/user/me/city") {
             val userId = call.getCurrentUserId()
-            val request = call.receive<UpdateCityRequest>()
-            val cityId = request.cityId
-
-            val updatedUser = userService.updateCity(userId, cityId)
+            val request = call.receive<UpdateUserRequest>() // Используем общую модель
+            val updatedUser = userService.updateProfile(userId, request)
             call.respond(updatedUser)
         }
     }

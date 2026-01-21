@@ -6,10 +6,7 @@ import org.patifiner.auth.TokenType
 import org.patifiner.auth.generateToken
 import org.patifiner.auth.verifyRefreshToken
 import org.patifiner.user.api.*
-import org.patifiner.user.api.UserException.EmailAlreadyTakenException
-import org.patifiner.user.api.UserException.InvalidCredentialsException
-import org.patifiner.user.api.UserException.UserNotFoundByEmailException
-import org.patifiner.user.api.UserException.UserNotFoundByIdException
+import org.patifiner.user.api.UserException.*
 
 private const val USER_PHOTO_LIMIT = 10
 
@@ -54,42 +51,26 @@ internal class UserService(
         )
     }
 
-    suspend fun getUserInfo(userId: Long): UserInfoDto = userDao.getById(userId)?.toDto()?: throw UserNotFoundByIdException(userId)
+    suspend fun getUserInfo(userId: Long): UserDto = userDao.getById(userId).toDto()
 
-    suspend fun updateAvatarUrl(userId: Long, avatarUrl: String?): UserInfoDto {
-        userDao.getById(userId)
-        return userDao.updateAvatarUrl(userId, avatarUrl)
-    }
+    suspend fun updateProfile(userId: Long, request: UpdateUserRequest): UserDto =
+        userDao.updateProfile(userId, request)
 
-    suspend fun addPhoto(userId: Long, photoUrl: String): UserInfoDto {
+    suspend fun updateAvatar(userId: Long, avatarUrl: String?): UserDto =
+        userDao.updateAvatarUrl(userId, avatarUrl)
+
+    suspend fun addPhoto(userId: Long, photoUrl: String): UserDto {
         val user = userDao.getById(userId)
-        val currentPhotos = user.photosList.toMutableList()
-
-        if (currentPhotos.size >= USER_PHOTO_LIMIT) {
-            throw UserException.PhotoLimitReachedException()
+        if (user.photos.size >= USER_PHOTO_LIMIT) {
+            throw PhotoLimitReachedException()
         }
-
-        currentPhotos.add(photoUrl)
-        return userDao.updatePhotos(userId, currentPhotos)
+        return userDao.updatePhotos(userId, user.photos + photoUrl)
     }
 
-    suspend fun removePhoto(userId: Long, photoUrl: String): String {
+    suspend fun removePhoto(userId: Long, photoToRemove: String): UserDto {
         val user = userDao.getById(userId)
-        val currentPhotos = user.photosList.toMutableList()
-
-        if (currentPhotos.remove(photoUrl)) {
-            userDao.updatePhotos(userId, currentPhotos)
-        }
-
-        if (user.avatarUrl == photoUrl) {
-            userDao.updateAvatarUrl(userId, null)
-        }
-
-        return photoUrl
+        val updatedPhotos = user.photos - photoToRemove
+        val newAvatarUrl = if (user.avatarUrl == photoToRemove) null else user.avatarUrl
+        return userDao.updateUserMedia(userId, updatedPhotos, newAvatarUrl)
     }
-
-    suspend fun setMainPhoto(userId: Long, photoUrl: String): UserInfoDto = userDao.updateAvatarUrl(userId, photoUrl)
-
-    suspend fun updateCity(userId: Long, cityId: Long?): UserInfoDto = userDao.updateCity(userId, cityId)
-
 }

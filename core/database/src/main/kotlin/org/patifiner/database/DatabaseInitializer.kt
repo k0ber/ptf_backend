@@ -8,17 +8,31 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.patifiner.database.tables.CitiesTable
+import org.patifiner.database.tables.CityEntity
+import org.patifiner.database.tables.EventsTable
+import org.patifiner.database.tables.TopicEntity
+import org.patifiner.database.tables.TopicsTable
+import org.patifiner.database.tables.UserTable
+import org.patifiner.database.tables.UserTopicsTable
 import org.slf4j.Logger
 
 private const val TOPICS_YAML = "/topics.yaml"
 private const val CITIES_YAML = "/cities.yaml"
+private data class CitiesListWrapper(val cities: List<CityInput>)
+private data class CityInput(val name: String, val country: String)
+private data class TopicsYamlRoot(val locale: String = "en", val topics: List<TopicYaml>)
 
-data class CitiesListWrapper(val cities: List<CityInput>)
-data class CityInput(val name: String, val country: String)
+private data class TopicYaml(
+    val name: String,
+    val slug: String? = null,
+    val description: String? = null,
+    val tags: List<String>? = null,
+    val icon: String? = null,
+    val children: List<TopicYaml>? = null
+)
 
-/**
- * Отвечает за начальную инициализацию схемы и наполнение базы мастер-данными.
- */
+// creates new default tables from files each time application starts
 class DatabaseInitializer(private val logger: Logger) {
 
     private val mapper = ObjectMapper(YAMLFactory())

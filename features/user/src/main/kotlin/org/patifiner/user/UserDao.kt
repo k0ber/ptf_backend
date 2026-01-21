@@ -4,30 +4,30 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.patifiner.database.CityEntity
-import org.patifiner.database.UserEntity
-import org.patifiner.database.UserTable
-import org.patifiner.database.UserTopicsTable
+import org.patifiner.base.PagedRequest
+import org.patifiner.base.calculateOffset
+import org.patifiner.database.tables.CityEntity
+import org.patifiner.database.tables.UserEntity
+import org.patifiner.database.tables.UserTable
+import org.patifiner.database.tables.UserTopicsTable
 import org.patifiner.user.api.CreateUserRequest
+import org.patifiner.user.api.UpdateUserRequest
 import org.patifiner.user.api.UserException
 import org.patifiner.user.api.UserException.UserNotFoundByIdException
 
 interface UserDao {
     suspend fun existsByEmail(email: String): Boolean
-    suspend fun create(userInfo: CreateUserRequest, hashedPassword: String): UserInfoDto
+    suspend fun create(userInfo: CreateUserRequest, hashedPassword: String): UserDto
+
     @Throws(UserNotFoundByIdException::class)
     suspend fun getById(id: Long): UserEntity
-    suspend fun findByEmail(email: String): UserEntity?
-    suspend fun findUsersByAnyTopics(
-        topicIds: Collection<Long>,
-        excludeUserId: Long,
-        limit: Int,
-        offset: Int
-    ): Set<UserInfoDto>
 
-    suspend fun updateAvatarUrl(userId: Long, avatarUrl: String?): UserInfoDto
-    suspend fun updatePhotos(userId: Long, photos: List<String>): UserInfoDto
-    suspend fun updateCity(userId: Long, cityId: Long?): UserInfoDto
+    suspend fun findByEmail(email: String): UserEntity?
+    suspend fun getUsersByIds(ids: List<Long>): List<UserDto>
+    suspend fun updateUserMedia(userId: Long, photos: List<String>, avatarUrl: String?): UserDto
+    suspend fun updateAvatarUrl(userId: Long, avatarUrl: String?): UserDto
+    suspend fun updatePhotos(userId: Long, photos: List<String>): UserDto
+    suspend fun updateProfile(userId: Long, request: UpdateUserRequest): UserDto
 }
 
 internal class ExposedUserDao : UserDao {
@@ -37,7 +37,7 @@ internal class ExposedUserDao : UserDao {
             UserEntity.find { UserTable.email eq email }.any()
         }
 
-    override suspend fun create(userInfo: CreateUserRequest, hashedPassword: String): UserInfoDto =
+    override suspend fun create(userInfo: CreateUserRequest, hashedPassword: String): UserDto =
         newSuspendedTransaction(Dispatchers.IO) {
             val user = UserEntity.new { fromCreateRequest(userInfo, hashedPassword) }
             user.toDto()
@@ -59,50 +59,48 @@ internal class ExposedUserDao : UserDao {
             UserEntity.find { UserTable.email eq email }.singleOrNull()
         }
 
-    override suspend fun findUsersByAnyTopics(
-        topicIds: Collection<Long>,
-        excludeUserId: Long,
-        limit: Int,
-        offset: Int
-    ): Set<UserInfoDto> = newSuspendedTransaction(Dispatchers.IO) {
-        if (topicIds.isEmpty()) return@newSuspendedTransaction emptySet()
+    override suspend fun getUsersByIds(ids: List<Long>): List<UserDto> =
+        newSuspendedTransaction(Dispatchers.IO) {
+            val users = UserEntity.find { UserTable.id inList ids }
+                .associateBy { it.id.value }
 
-        // 1) Берём нужные user_id с пересечением топиков (без текущего пользователя)
-        val userIds: List<Long> = UserTopicsTable
-            .slice(UserTopicsTable.user)
-            .select { (UserTopicsTable.topic inList topicIds) and (UserTopicsTable.user neq excludeUserId) }
-            .groupBy(UserTopicsTable.user)
-            .limit(n = limit, offset = offset.toLong())
-            .map { row -> row[UserTopicsTable.user].value }
+            // Сохраняем порядок, который пришел из поиска (важно для пагинации)
+            ids.mapNotNull { users[it]?.toDto() }
+        }
 
-        if (userIds.isEmpty()) return@newSuspendedTransaction emptySet()
-
-        // 2) Загружаем пользователей одним запросом и мапим по id
-        val usersById: Map<Long, UserEntity> = UserEntity.find { UserTable.id inList userIds }
-            .associateBy { it.id.value }
-
-        // 3) Соблюдаем исходный порядок (LIMIT/OFFSET) и мапим в DTO
-        userIds.mapNotNull { usersById[it]?.toDto() }.toSet()
-    }
-
-    override suspend fun updateAvatarUrl(userId: Long, avatarUrl: String?): UserInfoDto =
+    override suspend fun updateAvatarUrl(userId: Long, avatarUrl: String?): UserDto =
         newSuspendedTransaction(Dispatchers.IO) {
             val user = UserEntity.findById(userId) ?: throw UserNotFoundByIdException(userId)
             user.avatarUrl = avatarUrl
             user.toDto()
         }
 
-    override suspend fun updatePhotos(userId: Long, photos: List<String>): UserInfoDto =
+    override suspend fun updatePhotos(userId: Long, photos: List<String>): UserDto =
         newSuspendedTransaction(Dispatchers.IO) {
             val user = UserEntity.findById(userId) ?: throw UserNotFoundByIdException(userId)
-            user.photosList = photos
+            user.photos = photos
             user.toDto()
         }
 
-    override suspend fun updateCity(userId: Long, cityId: Long?): UserInfoDto =
+    override suspend fun updateProfile(userId: Long, request: UpdateUserRequest): UserDto =
         newSuspendedTransaction(Dispatchers.IO) {
             val user = UserEntity.findById(userId) ?: throw UserNotFoundByIdException(userId)
-            user.city = cityId?.let { CityEntity.findById(it) ?: throw UserException.CityNotFoundException(it) }
+
+            // Если ID города пришел - ищем город, если нет - получаем null
+            // Если ID был передан, но город не найден - кидаем ошибку
+            val city = request.cityId?.let {
+                CityEntity.findById(it) ?: throw UserException.CityNotFoundException(it)
+            }
+
+            user.fromUpdateRequest(request, city)
+            user.toDto()
+        }
+
+    override suspend fun updateUserMedia(userId: Long, photos: List<String>, avatarUrl: String?): UserDto =
+        newSuspendedTransaction(Dispatchers.IO) {
+            val user = UserEntity.findById(userId) ?: throw UserNotFoundByIdException(userId)
+            user.photos = photos
+            user.avatarUrl = avatarUrl
             user.toDto()
         }
 }

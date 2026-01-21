@@ -1,5 +1,6 @@
 package org.patifiner.search.api
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
@@ -10,6 +11,7 @@ import io.ktor.server.routing.post
 import org.koin.ktor.ext.inject
 import org.patifiner.auth.JWT_AUTH
 import org.patifiner.auth.getCurrentUserId
+import org.patifiner.base.PagedRequest
 import org.patifiner.search.SearchService
 
 fun Route.searchRoutes() {
@@ -19,13 +21,14 @@ fun Route.searchRoutes() {
     authenticate(JWT_AUTH) {
         post("/search/users") {
             val myId = call.getCurrentUserId()
-            val pagingRequest = call.receive<PaginationRequest>()
+            val pagingRequest = call.receive<PagedRequest>()
             call.respond(searchService.findUsers(myId, pagingRequest))
         }
 
         get("/search/ideas") {
             val myId = call.getCurrentUserId()
-            call.respond(searchService.findTopicIdea(myId))
+            val idea = searchService.findTopicIdea(myId)
+            call.respond(idea ?: HttpStatusCode.NoContent)
         }
     }
 }

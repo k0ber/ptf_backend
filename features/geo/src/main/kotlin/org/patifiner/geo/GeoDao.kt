@@ -3,8 +3,8 @@ package org.patifiner.geo
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.patifiner.database.CitiesTable
-import org.patifiner.database.CityEntity
+import org.patifiner.database.tables.CitiesTable
+import org.patifiner.database.tables.CityEntity
 
 interface GeoDao {
     suspend fun searchCities(query: String): List<CityDto>

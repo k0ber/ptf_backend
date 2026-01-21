@@ -2,14 +2,8 @@ name: Main Pipeline
 
 on:
   push:
-    branches: [ "main" ]
     tags: [ "v*" ]
   workflow_dispatch:
-
-# cancel jobs if there is a new one on same tag/branch
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   publish:

@@ -1,6 +1,6 @@
 package org.patifiner.geo
 
-import org.patifiner.database.CityEntity
+import org.patifiner.database.tables.CityEntity
 
 data class CityDto(
     val id: Long,

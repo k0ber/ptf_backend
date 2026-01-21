@@ -1,13 +1,14 @@
 package org.patifiner.user
 
-import kotlinx.datetime.toJavaLocalDate
-import org.patifiner.database.Gender
-import org.patifiner.database.UserEntity
-import org.patifiner.database.UserLanguage
+import kotlinx.datetime.LocalDate
+import org.patifiner.database.enums.Gender
+import org.patifiner.database.enums.UserLanguage
+import org.patifiner.database.tables.CityEntity
+import org.patifiner.database.tables.UserEntity
 import org.patifiner.user.api.CreateUserRequest
-import java.time.LocalDate
+import org.patifiner.user.api.UpdateUserRequest
 
-class UserInfoDto(
+class UserDto(
     val id: Long,
     val name: String,
     val avatarUrl: String? = null,
@@ -20,12 +21,12 @@ class UserInfoDto(
     val languages: List<UserLanguage> = emptyList()
 )
 
-fun UserEntity.toDto(): UserInfoDto = UserInfoDto(
+fun UserEntity.toDto(): UserDto = UserDto(
     id = this.id.value,
     name = this.name,
     avatarUrl = this.avatarUrl,
-    photos = this.photosList,
-    birthDate = this.birthDate?.toJavaLocalDate(),
+    photos = this.photos,
+    birthDate = this.birthDate,
     email = this.email,
     cityId = this.city?.id?.value,
     cityName = this.city?.name,
@@ -34,7 +35,15 @@ fun UserEntity.toDto(): UserInfoDto = UserInfoDto(
 )
 
 fun UserEntity.fromCreateRequest(req: CreateUserRequest, hashedPassword: String) {
-    name = req.name
-    email = req.email
-    password = hashedPassword
+    this.name = req.name
+    this.email = req.email
+    this.password = hashedPassword
+}
+
+fun UserEntity.fromUpdateRequest(req: UpdateUserRequest, city: CityEntity?) {
+    this.name = req.name
+    req.birthDate?.let { dateStr -> this.birthDate = LocalDate.parse(dateStr) }
+    this.gender = req.gender
+    this.languages = req.languages
+    this.city = city
 }

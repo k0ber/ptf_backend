@@ -1,4 +1,4 @@
-package org.patifiner.database
+package org.patifiner.database.tables
 
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
