@@ -21,5 +21,5 @@ include(
     ":features:user",
     ":features:geo",
     ":features:events",
-
+    ":features:relations",
 )

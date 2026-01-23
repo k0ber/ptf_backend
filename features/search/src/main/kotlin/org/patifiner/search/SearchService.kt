@@ -2,6 +2,7 @@ package org.patifiner.search
 
 import org.patifiner.base.PagedRequest
 import org.patifiner.database.enums.TopicLevel
+import org.patifiner.relations.RelationsDao
 import org.patifiner.topics.TopicDao
 import org.patifiner.topics.UserTopicDto
 import org.patifiner.user.UserDao
@@ -10,7 +11,8 @@ import org.patifiner.user.toDto
 
 internal class SearchService(
     private val userDao: UserDao,
-    private val topicDao: TopicDao
+    private val topicDao: TopicDao,
+    private val relationsDao: RelationsDao
 ) {
     suspend fun findTopicIdea(myUserId: Long): TopicIdeaDto? {
         val myTopics = topicDao.getUserTopics(myUserId)
@@ -20,16 +22,15 @@ internal class SearchService(
             return TopicIdeaDto(
                 person = UserProfileDto(myUserProfile.toDto(), myTopics),
                 topic = topicDao.getTopicsTree().first(),
-                getIdeaForEmptyTopics()
+                idea = getIdeaForEmptyTopics()
             )
         }
 
-        val myTopicIds = myTopics.map { it.topic.id }
-
         // 1. Пытаемся найти ОДНОГО случайного человека с общим топиком
+        val myTopicIds = myTopics.map { it.topic.id }
         val candidateId = topicDao.getRandomUserIdByAnyTopics(
             topicIds = myTopicIds,
-            excludeUserId = myUserId
+            excludeUserIds = relationsDao.getMutedUserIds(myUserId) + myUserId
         )
 
         // 2. Если никого нет — возвращаем null.
@@ -60,22 +61,22 @@ internal class SearchService(
         val myTopics = topicDao.getUserTopics(myId)
         if (myTopics.isEmpty()) return emptyList()
 
+        val excludeUserIds = relationsDao.getMutedUserIds(myId) + myId
         val topicIds = myTopics.map { it.topic.id }
 
         val userIds = topicDao.findUserIdsByAnyTopics(
             topicIds = topicIds,
-            excludeUserId = myId,
+            excludeUserIds = excludeUserIds,
             pagedRequest = req
         )
 
         return userDao.getUsersByIds(userIds)
     }
 
-// -------------------- helpers --------------------
+    //region helpers
+    private fun getIdeaForEmptyTopics() = "Добавьте себе хотя бы один топик !!"
 
-    fun getIdeaForEmptyTopics() = "Добавьте себе хотя бы один топик !!"
-
-    fun getIdeaText(
+    private fun getIdeaText(
         myInfo: UserDto,
         myTopic: UserTopicDto,
         personInfo: UserDto,
@@ -128,6 +129,7 @@ internal class SearchService(
             else -> listOf("поставьте куданибудь лайк !!")
         }.random()
     }
+    //endregion
 }
 //            "Начните с обсуждения общих интересов и выберите формат по настроению."
 //            "Предложите начать вместе с простого плана на неделю и обмениваться прогрессом."

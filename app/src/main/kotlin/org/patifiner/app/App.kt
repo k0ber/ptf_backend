@@ -28,6 +28,8 @@ import org.patifiner.events.api.eventsRoutes
 import org.patifiner.events.eventsModule
 import org.patifiner.geo.api.geoRoutes
 import org.patifiner.geo.geoModule
+import org.patifiner.relations.api.relationsRoutes
+import org.patifiner.relations.relationsModule
 import org.patifiner.search.api.searchRoutes
 import org.patifiner.search.searchModule
 import org.patifiner.topics.api.topicsRoutes
@@ -59,7 +61,8 @@ internal fun Application.module() {
             searchModule,
             uploadModule,
             geoModule,
-            eventsModule
+            eventsModule,
+            relationsModule,
         )
     }
 
@@ -72,7 +75,7 @@ internal fun Application.module() {
     installAuth(jwtConfig)
     installStatusPages(logger)
     initDatabase(databaseConfig, databaseInitializer, logger)
-    installJackson()
+    installSerialization()
     installCallLogs()
     installCors()
 
@@ -84,12 +87,13 @@ internal fun Application.module() {
         uploadRoutes()
         geoRoutes()
         eventsRoutes()
+        relationsRoutes()
     }
 
     logger.info("Server has started")
 }
 
-private fun Application.installJackson() {
+private fun Application.installSerialization() {
     install(ContentNegotiation) {
         jackson {
             enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT)

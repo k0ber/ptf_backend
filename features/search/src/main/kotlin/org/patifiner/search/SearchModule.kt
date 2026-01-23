@@ -5,6 +5,6 @@ import org.koin.dsl.module
 
 val searchModule = module {
 
-    single { SearchService(get(), get()) }
+    single { SearchService(userDao = get(), topicDao = get(), relationsDao = get()) }
 
 }

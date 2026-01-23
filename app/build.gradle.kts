@@ -24,6 +24,7 @@ dependencies {
     implementation(projects.features.upload)
     implementation(projects.features.geo)
     implementation(projects.features.events)
+    implementation(projects.features.relations)
 }
 
 application {

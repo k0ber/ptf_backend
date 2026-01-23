@@ -3,12 +3,11 @@ plugins {
     id("buildlogic.kotlin-server-conventions")
     id("buildlogic.kotlin-database-conventions")
 }
+
 dependencies {
-    implementation(projects.core.auth)
     implementation(projects.core.base)
+    implementation(projects.core.auth)
     implementation(projects.core.database)
 
-    implementation(projects.features.topics)
-    implementation(projects.features.user)
-    implementation(projects.features.relations)
+    implementation(projects.features.user) // common dto module instead?
 }

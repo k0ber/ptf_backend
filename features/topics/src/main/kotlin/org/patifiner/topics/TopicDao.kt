@@ -34,8 +34,17 @@ interface TopicDao {
     suspend fun removeUserTopics(userId: Long, topicIds: List<Long>): Long
     suspend fun getUserTopics(userId: Long): Set<UserTopicDto>
     suspend fun getTopicsTree(): List<TopicDto>
-    suspend fun findUserIdsByAnyTopics(topicIds: Collection<Long>, excludeUserId: Long, pagedRequest: PagedRequest): List<Long>
-    suspend fun getRandomUserIdByAnyTopics(topicIds: Collection<Long>, excludeUserId: Long): Long?
+
+    suspend fun findUserIdsByAnyTopics(
+        topicIds: Collection<Long>,
+        excludeUserIds: Collection<Long>,
+        pagedRequest: PagedRequest
+    ): List<Long>
+
+    suspend fun getRandomUserIdByAnyTopics(
+        topicIds: Collection<Long>,
+        excludeUserIds: Collection<Long>
+    ): Long?
 }
 
 class ExposedTopicDao : TopicDao {
@@ -132,7 +141,7 @@ class ExposedTopicDao : TopicDao {
 
     override suspend fun findUserIdsByAnyTopics(
         topicIds: Collection<Long>,
-        excludeUserId: Long,
+        excludeUserIds: Collection<Long>,
         pagedRequest: PagedRequest
     ): List<Long> = newSuspendedTransaction(Dispatchers.IO) {
         if (topicIds.isEmpty()) return@newSuspendedTransaction emptyList()
@@ -143,7 +152,7 @@ class ExposedTopicDao : TopicDao {
             .slice(UserTopicsTable.user)
             .select {
                 (UserTopicsTable.topic inList topicIds) and
-                        (UserTopicsTable.user neq excludeUserId)
+                        (UserTopicsTable.user notInList excludeUserIds)
             }
             .groupBy(UserTopicsTable.user)
             .limit(n = pagedRequest.perPage, offset = offsetValue)
@@ -157,14 +166,14 @@ class ExposedTopicDao : TopicDao {
 
     override suspend fun getRandomUserIdByAnyTopics(
         topicIds: Collection<Long>,
-        excludeUserId: Long
+        excludeUserIds: Collection<Long>
     ): Long? = newSuspendedTransaction(Dispatchers.IO) {
         if (topicIds.isEmpty()) return@newSuspendedTransaction null
 
         UserTopicsTable
             .slice(UserTopicsTable.user)
             .select {
-                (UserTopicsTable.topic inList topicIds) and (UserTopicsTable.user neq excludeUserId)
+                (UserTopicsTable.topic inList topicIds) and (UserTopicsTable.user notInList excludeUserIds)
             }
             .groupBy(UserTopicsTable.user)
             .orderBy(Random())
