@@ -15,11 +15,12 @@ data class CreateUserRequest(val name: String, val email: String, val password: 
 data class UserCreatedResponse(val userInfo: UserDto, val token: TokenResponse)
 
 data class UpdateUserRequest(
-    val name: String,
+    val name: String? = null,
     val birthDate: String? = null,
     val gender: Gender = Gender.NOT_SPECIFIED,
     val cityId: Long? = null,
-    val languages: List<UserLanguage> = emptyList()
+    val languages: List<UserLanguage> = emptyList(),
+    val locale: String? = null
 )
 
 data class DeletePhotoRequest(val url: String)

@@ -18,7 +18,8 @@ class UserDto(
     val cityId: Long? = null,
     val cityName: String? = null,
     val gender: Gender = Gender.NOT_SPECIFIED,
-    val languages: List<UserLanguage> = emptyList()
+    val languages: List<UserLanguage> = emptyList(),
+    val locale: String
 )
 
 fun UserEntity.toDto(): UserDto = UserDto(
@@ -31,19 +32,22 @@ fun UserEntity.toDto(): UserDto = UserDto(
     cityId = this.city?.id?.value,
     cityName = this.city?.name,
     gender = this.gender,
-    languages = this.languages
+    languages = this.languages,
+    locale = this.locale
 )
 
 fun UserEntity.fromCreateRequest(req: CreateUserRequest, hashedPassword: String) {
     this.name = req.name
     this.email = req.email
     this.password = hashedPassword
+    this.locale = "en"
 }
 
 fun UserEntity.fromUpdateRequest(req: UpdateUserRequest, city: CityEntity?) {
-    this.name = req.name
+    req.name?.let { this.name = it }
     req.birthDate?.let { dateStr -> this.birthDate = LocalDate.parse(dateStr) }
-    this.gender = req.gender
-    this.languages = req.languages
-    this.city = city
+    req.gender?.let { this.gender = it }
+    req.languages?.let { this.languages = it }
+    req.locale?.let { this.locale = it }
+    req.cityId?.let { this.city = city }
 }

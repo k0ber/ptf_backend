@@ -11,6 +11,7 @@ object UserTopicsTable : LongIdTable("user_topics") {
     val topic = reference("topic_id", TopicsTable)
     val level = enumerationByName("level", 20, TopicLevel::class)
         .default(TopicLevel.NONE)
+
     val description = varchar("description", 250).nullable()
 
     init {

@@ -8,13 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.patifiner.database.tables.CitiesTable
-import org.patifiner.database.tables.CityEntity
-import org.patifiner.database.tables.EventsTable
-import org.patifiner.database.tables.TopicEntity
-import org.patifiner.database.tables.TopicsTable
-import org.patifiner.database.tables.UserTable
-import org.patifiner.database.tables.UserTopicsTable
+import org.patifiner.database.tables.*
 import org.slf4j.Logger
 
 private const val TOPICS_YAML = "/topics.yaml"
@@ -48,7 +42,10 @@ class DatabaseInitializer(private val logger: Logger) {
                 CitiesTable,
                 TopicsTable,
                 UserTopicsTable,
-                EventsTable
+                UserRelationsTable,
+                EventsTable,
+                EventTopicsTable,
+                EventParticipantsTable
             )
 
             // 2. Специфичные для БД расширения

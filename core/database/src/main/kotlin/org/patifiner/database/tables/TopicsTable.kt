@@ -12,7 +12,7 @@ object TopicsTable : LongIdTable("topics") {
     val tags = text("tags").nullable()
     val icon = varchar("icon", 32).nullable()
     val parent = reference("parent_id", TopicsTable).nullable()
-    val locale = varchar("locale", 8).default("en")
+    val locale = varchar("locale", 8).default("en") // todo: locale
 }
 
 class TopicEntity(id: EntityID<Long>) : LongEntity(id) {

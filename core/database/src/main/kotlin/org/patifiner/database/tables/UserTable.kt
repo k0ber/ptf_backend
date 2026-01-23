@@ -20,6 +20,7 @@ object UserTable : LongIdTable("user") {
     val password = varchar("password", 100)
     val gender = enumerationByName("gender", 20, Gender::class).default(Gender.NOT_SPECIFIED)
     val languages = jsonb<List<UserLanguage>>("languages", DatabaseConfig.json).default(emptyList())
+    val locale = varchar("locale", 10).default("en") // Предпочтительный язык пользователя
 }
 
 class UserEntity(id: EntityID<Long>) : LongEntity(id) {
@@ -34,4 +35,5 @@ class UserEntity(id: EntityID<Long>) : LongEntity(id) {
     var password by UserTable.password
     var gender by UserTable.gender
     var languages by UserTable.languages
+    var locale by UserTable.locale
 }
