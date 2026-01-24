@@ -1,0 +1,419 @@
+{
+  "info": {
+    "_postman_id": "18463388-7143-45b1-94c8-fcea9e83b942",
+    "name": "Patifiner API Actual",
+    "description": "Полная коллекция актуальных роутов Patifiner",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. User & Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json();",
+                  "if(data.token) {",
+                  "    pm.environment.set('jwt_token', data.token.accessToken);",
+                  "    pm.environment.set('refresh_token', data.token.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/user/create" }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json();",
+                  "if(data.accessToken) {",
+                  "    pm.environment.set('jwt_token', data.accessToken);",
+                  "    pm.environment.set('refresh_token', data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/user/login" }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json();",
+                  "if(data.accessToken) {",
+                  "    pm.environment.set('jwt_token', data.accessToken);",
+                  "    pm.environment.set('refresh_token', data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/user/refresh" }
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/user/me" }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"1995-01-01\",\n  \"locale\": \"en\",\n  \"cityId\": 1,\n  \"languages\": [\n    {\"languageCode\": \"ru\", \"level\": \"NATIVE\"},\n    {\"languageCode\": \"en\", \"level\": \"FLUENT\"}\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/user/update" }
+          }
+        },
+        {
+          "name": "Set Avatar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://api.patifiner.ru/files/photo1.jpg\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/user/me/avatar" }
+          }
+        },
+        {
+          "name": "Add Photo (Multipart)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/user/me/photo" }
+          }
+        },
+        {
+          "name": "Delete Photo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://api.patifiner.ru/files/photo1.jpg\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/user/me/photo" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Topics",
+      "item": [
+        {
+          "name": "Get Topics Tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/topics/tree" }
+          }
+        },
+        {
+          "name": "Search Topics",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/topics/search?q=Kotlin",
+              "query": [{ "key": "q", "value": "Kotlin" }]
+            }
+          }
+        },
+        {
+          "name": "Add My Topics",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topics\": [\n    {\"topicId\": 1, \"level\": \"INTERMEDIATE\", \"description\": \"Learning everyday\"}\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/topics/me" }
+          }
+        },
+        {
+          "name": "Get My Topics",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/topics/me" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Events",
+      "item": [
+        {
+          "name": "Create Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Evening Coding\",\n  \"description\": \"Let's build something cool\",\n  \"type\": \"IRL_PUBLIC_PLACE\",\n  \"cityId\": 1,\n  \"eventDate\": \"2026-05-01T18:00:00\",\n  \"topicIds\": [1, 2]\n}"
+            },
+            "url": { "raw": "{{base_url}}/events/create" }
+          }
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/events/1" }
+          }
+        },
+        {
+          "name": "Join Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/events/1/join" }
+          }
+        },
+        {
+          "name": "Invite User to Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetUserId\": 2\n}"
+            },
+            "url": { "raw": "{{base_url}}/events/1/invite" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Relations",
+      "item": [
+        {
+          "name": "Get My Relations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/user/relations" }
+          }
+        },
+        {
+          "name": "Send Friend Invite",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetUserId\": 2\n}"
+            },
+            "url": { "raw": "{{base_url}}/user/relations/status" }
+          }
+        },
+        {
+          "name": "Accept Friend Invite",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetUserId\": 2\n}"
+            },
+            "url": { "raw": "{{base_url}}/user/relations/accept" }
+          }
+        },
+        {
+          "name": "Block User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetUserId\": 2\n}"
+            },
+            "url": { "raw": "{{base_url}}/user/relations/block" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Search & Ideas",
+      "item": [
+        {
+          "name": "Search Users (Paged)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"perPage\": 10\n}"
+            },
+            "url": { "raw": "{{base_url}}/search/users" }
+          }
+        },
+        {
+          "name": "Get Topic Idea",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/search/ideas" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Geo",
+      "item": [
+        {
+          "name": "Search Cities",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/geo/cities/search?q=Lond",
+              "query": [{ "key": "q", "value": "Lond" }]
+            }
+          }
+        },
+        {
+          "name": "Get All Cities (Paged)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"perPage\": 10\n}"
+            },
+            "url": { "raw": "{{base_url}}/geo/cities/all" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/check" }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "jwt_token", "value": "" },
+    { "key": "refresh_token", "value": "" }
+  ]
+}
