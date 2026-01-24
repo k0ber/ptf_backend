@@ -27,6 +27,4 @@ data class UpdateEventRequest(
     val topicIds: List<Long>? = null
 )
 
-data class UpdateParticipantRequest(val status: ParticipantStatus)
-
 data class InviteParticipantRequest(val targetUserId: Long)
