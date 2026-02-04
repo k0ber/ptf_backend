@@ -5,12 +5,13 @@ import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.patifiner.database.enums.Language
+import org.patifiner.database.jacksonb
 
 object TopicsTable : LongIdTable("topics") {
     val name = varchar("name", 255)
     val slug = varchar("slug", 255).uniqueIndex()
     val description = text("description").nullable()
-    val tags = text("tags").nullable()
+    val tags = jacksonb<List<String>>("tags").default(emptyList())
     val icon = varchar("icon", 32).nullable()
     val parent = reference("parent_id", TopicsTable).nullable()
     val locale = enumerationByName("locale", 10, Language::class)

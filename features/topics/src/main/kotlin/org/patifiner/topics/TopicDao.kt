@@ -32,6 +32,7 @@ interface TopicDao {
     fun removeUserTopics(userId: Long, topicIds: List<Long>): Long
     fun getUserTopics(userId: Long): Set<UserTopicDto>
     fun getTopicsTree(): List<TopicDto>
+    fun getAllTopics(): List<TopicDto>
 
     fun findUserIdsByAnyTopics(
         topicIds: Collection<Long>,
@@ -66,7 +67,7 @@ class ExposedTopicDao : TopicDao {
             name = request.name
             slug = request.slug
             description = request.description
-            tags = request.tags?.joinToString(",")
+            tags = request.tags
             icon = request.icon
             parent = foundParent
         }
@@ -128,6 +129,8 @@ class ExposedTopicDao : TopicDao {
             if (childrenIds.isNotEmpty()) currentDto.copy(childrenIds = childrenIds) else currentDto
         }
     }
+
+    override fun getAllTopics(): List<TopicDto> = TopicEntity.all().map { it.toDto() }
 
     override fun findUserIdsByAnyTopics(
         topicIds: Collection<Long>,

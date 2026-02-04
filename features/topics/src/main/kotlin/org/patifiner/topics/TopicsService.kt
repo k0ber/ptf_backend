@@ -36,4 +36,18 @@ class TopicsService(private val topicDao: TopicDao) {
         topicDao.getTopicsTree()
     }
 
+    suspend fun getTopicsByTags(): List<TagGroupDto> = newSuspendedTransaction(Dispatchers.IO) {
+        val allTopics = topicDao.getAllTopics()
+        val tagMap = mutableMapOf<String, MutableList<TopicDto>>()
+
+        allTopics.forEach { topic ->
+            topic.tags.forEach { tag ->
+                tagMap.getOrPut(tag) { mutableListOf() }.add(topic)
+            }
+        }
+
+        tagMap.map { (tag, topics) -> TagGroupDto(tag, topics) }
+            .sortedByDescending { it.topics.size } // Сначала самые популярные теги
+    }
+
 }

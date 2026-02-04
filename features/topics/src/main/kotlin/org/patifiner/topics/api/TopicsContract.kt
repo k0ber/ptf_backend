@@ -6,7 +6,7 @@ data class CreateTopicRequest(
     val name: String,
     val slug: String,
     val description: String? = null,
-    val tags: List<String>? = null,
+    val tags: List<String> = emptyList(),
     val parentId: Long? = null,
     val icon: String? = null
 )
