@@ -1,0 +1,1 @@
+{"total":2,"items":[{"uid":"2387e42059ebe2bb226cf418ce6f38f4","name":"org.patifiner.app.KoinModuleTest","statistic":{"failed":0,"broken":0,"skipped":0,"passed":1,"unknown":0,"total":1}},{"uid":"56ff6fa3dfa2b04a3de408a1a4c6c171","name":"org.patifiner.app.SystemIntegrationTest","statistic":{"failed":0,"broken":0,"skipped":0,"passed":1,"unknown":0,"total":1}}]}

@@ -1,0 +1,1 @@
+[{"uid":"ef1936f39d16cec8","name":"blocked user should disappear from search results()","time":{"start":1770238873501,"stop":1770238875195,"duration":1694},"status":"passed","severity":"normal"},{"uid":"3116dfcdf28e2430","name":"verify full application koin graph()","time":{"start":1770238872987,"stop":1770238873426,"duration":439},"status":"passed","severity":"normal"}]
