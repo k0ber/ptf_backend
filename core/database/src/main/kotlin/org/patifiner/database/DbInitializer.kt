@@ -36,7 +36,7 @@ private data class TopicYaml(
     val name: String,
     val slug: String? = null,
     val description: String? = null,
-    val tags: List<String>? = null,
+    val tags: List<String> = emptyList(),
     val icon: String? = null,
     val children: List<TopicYaml>? = null
 )
@@ -114,7 +114,7 @@ class DbInitializer(private val logger: Logger) {
                     name = node.name
                     slug = slugValue
                     description = node.description
-                    tags = node.tags?.joinToString(",")
+                    tags = node.tags
                     icon = node.icon ?: node.name.take(1)
                     locale = localeEnum
                     this.parent = parent
