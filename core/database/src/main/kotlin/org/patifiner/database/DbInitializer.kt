@@ -2,20 +2,35 @@ package org.patifiner.database
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.patifiner.database.tables.*
+import org.patifiner.base.configurePtfDefaults
+import org.patifiner.database.enums.Language
+import org.patifiner.database.tables.CitiesTable
+import org.patifiner.database.tables.CityEntity
+import org.patifiner.database.tables.EventParticipantsTable
+import org.patifiner.database.tables.EventTopicsTable
+import org.patifiner.database.tables.EventsTable
+import org.patifiner.database.tables.TopicEntity
+import org.patifiner.database.tables.TopicsTable
+import org.patifiner.database.tables.UserRelationsTable
+import org.patifiner.database.tables.UserTable
+import org.patifiner.database.tables.UserTopicsTable
 import org.slf4j.Logger
 
 private const val TOPICS_YAML = "/topics.yaml"
 private const val CITIES_YAML = "/cities.yaml"
+
 private data class CitiesListWrapper(val cities: List<CityInput>)
 private data class CityInput(val name: String, val country: String)
-private data class TopicsYamlRoot(val locale: String = "en", val topics: List<TopicYaml>)
+
+private data class TopicsYamlRoot(
+    val locale: Language = Language.EN,
+    val topics: List<TopicYaml>
+)
 
 private data class TopicYaml(
     val name: String,
@@ -27,16 +42,14 @@ private data class TopicYaml(
 )
 
 // creates new default tables from files each time application starts
-class DatabaseInitializer(private val logger: Logger) {
+class DbInitializer(private val logger: Logger) {
 
-    private val mapper = ObjectMapper(YAMLFactory())
-        .registerModule(KotlinModule.Builder().build())
+    private val yamlMapper = ObjectMapper(YAMLFactory()).configurePtfDefaults()
 
     suspend fun initData() {
         logger.info("Starting database initialization...")
 
         newSuspendedTransaction(Dispatchers.IO) {
-            // 1. Управление схемой
             SchemaUtils.create(
                 UserTable,
                 CitiesTable,
@@ -48,10 +61,8 @@ class DatabaseInitializer(private val logger: Logger) {
                 EventParticipantsTable
             )
 
-            // 2. Специфичные для БД расширения
             exec("CREATE EXTENSION IF NOT EXISTS pg_trgm")
 
-            // 3. Синхронизация данных
             loadCities()
             loadTopics()
         }
@@ -64,7 +75,7 @@ class DatabaseInitializer(private val logger: Logger) {
             ?: return logger.warn("Resource not found: $CITIES_YAML")
 
         stream.use {
-            val data = mapper.readValue<CitiesListWrapper>(it)
+            val data = yamlMapper.readValue<CitiesListWrapper>(it)
             data.cities.forEach { input ->
                 val exists = !CityEntity.find { CitiesTable.name eq input.name }.empty()
                 if (!exists) {
@@ -83,14 +94,20 @@ class DatabaseInitializer(private val logger: Logger) {
             ?: return logger.warn("Resource not found: $TOPICS_YAML")
 
         stream.use {
-            val root = mapper.readValue<TopicsYamlRoot>(it)
+            val root = try {
+                yamlMapper.readValue<TopicsYamlRoot>(it)
+            } catch (e: Exception) {
+                logger.error("Failed to parse topics.yaml}", e)
+                return
+            }
+
+            val localeEnum = root.locale
 
             fun insertRecursively(node: TopicYaml, parent: TopicEntity? = null) {
                 val slugValue = node.slug ?: node.name.lowercase().replace(" ", "_")
 
-                // Ищем существующий топик по slug и локали
                 val existing = TopicEntity.find {
-                    (TopicsTable.slug eq slugValue) and (TopicsTable.locale eq root.locale)
+                    (TopicsTable.slug eq slugValue) and (TopicsTable.locale eq localeEnum)
                 }.firstOrNull()
 
                 val topic = existing ?: TopicEntity.new {
@@ -99,7 +116,7 @@ class DatabaseInitializer(private val logger: Logger) {
                     description = node.description
                     tags = node.tags?.joinToString(",")
                     icon = node.icon ?: node.name.take(1)
-                    locale = root.locale
+                    locale = localeEnum
                     this.parent = parent
                 }
 
@@ -107,50 +124,7 @@ class DatabaseInitializer(private val logger: Logger) {
             }
 
             root.topics.forEach { insertRecursively(it) }
-            logger.info("Topics synchronization for locale '${root.locale}' completed.")
+            logger.info("Topics synchronization for locale '${localeEnum}' completed.")
         }
     }
 }
-
-/**
- *
- *     // ---------- IMPORT ----------
- *     suspend fun importFromYaml(yamlText: String, overwrite: Boolean = true) {
- *         val mapper = ObjectMapper(YAMLFactory()).registerModule(KotlinModule.Builder().build())
- *         val root: TopicsYamlRoot = mapper.readValue(yamlText)
- *
- *         newSuspendedTransaction {
- *             fun insertRecursively(node: TopicYaml, parent: TopicEntity? = null) {
- *                 val existing = TopicEntity.find { (TopicsTable.slug eq (node.slug ?: "")) and (TopicsTable.locale eq root.locale) }.firstOrNull()
- *
- *                 val topic = existing ?: TopicEntity.new {
- *                     name = node.name
- *                     slug = node.slug ?: node.name.slugify()
- *                     description = node.description
- *                     tags = node.tags?.joinToString(",")
- *                     icon = node.name.take(2)
- *                     locale = root.locale
- *                     this.parent = parent
- *                 }
- *
- *                 node.children?.forEach { insertRecursively(it, topic) }
- *             }
- *
- *             root.topics.forEach { insertRecursively(it) }
- *         }
- *     }
- *
- *     private fun String.slugify(): String {
- *         // Убираем emoji и спецсимволы, оставляем только буквы/цифры/пробелы/дефисы
- *         val normalized = Normalizer.normalize(this, Normalizer.Form.NFD)
- *             .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
- *             .replace("[^\\p{L}\\p{Nd}\\s-]".toRegex(), "") // оставляем буквы, цифры, пробелы и дефисы
- *             .trim()
- *             .lowercase()
- *             .replace("\\s+".toRegex(), "-") // заменяем пробелы на дефисы
- *             .replace("-+".toRegex(), "-")   // сжимаем повторяющиеся дефисы
- *
- *         // Обрезаем, чтобы slug не был слишком длинным
- *         return normalized.take(64)
- *     }
- */

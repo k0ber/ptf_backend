@@ -1,27 +1,41 @@
 plugins {
-    id("buildlogic.kotlin-common-conventions")
+    id("buildlogic.kotlin-test-base-conventions")
 }
+
+val aspectjAgent: Configuration by configurations.creating
 
 dependencies {
-    testImplementation(libs.junit.jupiter.api)
-    testImplementation(libs.junit.jupiter.engine)
-    testImplementation(libs.mockk)
+    api(platform(libs.junit.bom))
+    api(libs.junit.jupiter.api)
+    api(libs.junit.jupiter.params)
+    api(libs.junit.jupiter.engine)
 
-    testImplementation(libs.kotlinx.coroutines.core)
-    testImplementation(libs.kotlinx.coroutines.test)
+    api(libs.koin.test)
+    api(libs.koin.test.junit)
 
-    testImplementation(libs.koin.test)
-    testImplementation(libs.koin.test.junit)
+    api(libs.ktor.server.test.host)
+    api(libs.ktor.client.content.negotiation)
+    api(libs.ktor.serialization.jackson)
 
-    testImplementation(libs.ktor.server.test.host)
-    testImplementation(libs.ktor.client.core)
-    testImplementation(libs.ktor.client.content.negotiation)
+    api(libs.kotlinx.coroutines.test)
+    api(libs.jetbrains.kotlin.test)
+
+    api(libs.h2database)
+
+    api(platform(libs.allure.bom))
+    api(libs.allure.junit5)
+
+    aspectjAgent(libs.aspectj.weaver) {
+        isTransitive = false
+    }
 }
 
-testing {
-    suites {
-        val test by getting(JvmTestSuite::class) {
-            useJUnitJupiter(libs.versions.junit)
-        }
-    }
+tasks.withType<Test> {
+    val agentFile = aspectjAgent.incoming.artifacts.resolvedArtifacts.map { it.first().file }
+
+    jvmArgumentProviders.add(CommandLineArgumentProvider {
+        listOf("-javaagent:${agentFile.get().absolutePath}")
+    })
+
+    systemProperty("allure.results.directory", layout.buildDirectory.dir("allure-results").get().asFile.absolutePath)
 }

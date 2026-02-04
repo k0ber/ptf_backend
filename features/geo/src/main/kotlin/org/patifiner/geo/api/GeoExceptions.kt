@@ -1,8 +1,8 @@
 package org.patifiner.geo.api
 
 import io.ktor.http.HttpStatusCode
-import org.patifiner.base.PatifinerException
+import org.patifiner.base.PtfException
 
-sealed class UploadException(message: String, statusCode: HttpStatusCode) : PatifinerException(message, "UPLOAD_ERROR", statusCode) {
+sealed class UploadException(message: String, statusCode: HttpStatusCode) : PtfException(message, "UPLOAD_ERROR", statusCode) {
 
 }

@@ -2,14 +2,14 @@ package org.patifiner.upload
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.patifiner.upload.api.UploadConfig
+import org.patifiner.base.PtfUploadConfig
 import org.patifiner.upload.api.UploadException
 import org.patifiner.upload.api.UploadResponse
 import org.slf4j.Logger
 import java.io.File
 import java.util.UUID
 
-class UploadService(val config: UploadConfig, val logger: Logger) {
+class UploadService(val config: PtfUploadConfig, val logger: Logger) {
     private val supportedMimeTypes = setOf("image/jpeg", "image/png", "image/webp")
 
     suspend fun saveImage(fileBytes: ByteArray, originalFileName: String?, fileContentType: String?, fileSize: Long): UploadResponse =

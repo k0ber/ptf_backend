@@ -4,6 +4,7 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.patifiner.database.enums.Language
 
 object TopicsTable : LongIdTable("topics") {
     val name = varchar("name", 255)
@@ -12,7 +13,8 @@ object TopicsTable : LongIdTable("topics") {
     val tags = text("tags").nullable()
     val icon = varchar("icon", 32).nullable()
     val parent = reference("parent_id", TopicsTable).nullable()
-    val locale = varchar("locale", 8).default("en") // todo: locale
+    val locale = enumerationByName("locale", 10, Language::class)
+        .default(Language.EN)
 }
 
 class TopicEntity(id: EntityID<Long>) : LongEntity(id) {

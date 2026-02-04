@@ -30,3 +30,9 @@ desktop.ini
 === Docker/Runtime Files ===
 volumes/
 *.log
+
+# Allureallure-results/
+allure-report/
+allure-history/
+**/allure-results/
+**/allure-report/

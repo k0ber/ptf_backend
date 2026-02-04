@@ -6,6 +6,6 @@ val userModule = module {
 
     val userDao = ExposedUserDao()
     single<UserDao> { userDao }
-    single<UserService> { UserService(userDao, get()) }
+    single<UserService> { UserService(userDao = userDao, jwtConfig = get()) }
 
 }

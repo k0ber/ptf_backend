@@ -1,11 +1,11 @@
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "1.9.0" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.0" }
 
 [versions]
-kotlin-gradle-plugin = "2.2.0"
+kotlin-gradle-plugin = "2.3.0"
 
-koin = "3.2.0"
-ktor = "2.3.4"
+koin = "4.1.1"
+ktor = "3.4.0"
 jbcrypt = "0.4"
 
 logback = "1.4.11"
@@ -18,7 +18,8 @@ postgresql = "42.7.1"
 
 h2 = "2.3.232"
 junit = "5.12.1"
-mockk = "1.12.0"
+allure = "2.32.0"
+aspectj = "1.9.22.1"
 
 [libraries]
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin-gradle-plugin" }
@@ -43,9 +44,16 @@ hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 
 # TESTS
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
+
+allure-bom = { module = "io.qameta.allure:allure-bom", version.ref = "allure" }
+allure-junit5 = { module = "io.qameta.allure:allure-junit5" }
+aspectj-weaver = { module = "org.aspectj:aspectjweaver", version.ref = "aspectj" }
+
+jetbrains-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-gradle-plugin" }
 h2database = { module = "com.h2database:h2", version.ref = "h2" }
 
 # KTOR
@@ -65,6 +73,5 @@ ktor-server-double-receive = { module = "io.ktor:ktor-server-double-receive", ve
 ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-cors = { module =  "io.ktor:ktor-server-cors", version.ref = "ktor" }
 
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 mindrot-jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt" }

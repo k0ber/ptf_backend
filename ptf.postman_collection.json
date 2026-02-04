@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "18463388-7143-45b1-94c8-fcea9e83b942",
-    "name": "Patifiner API Actual",
-    "description": "Полная коллекция актуальных роутов Patifiner",
+    "name": "Patifiner API v0.2.0",
+    "description": "Полная коллекция актуальных роутов Patifiner. Обновлено после рефакторинга DAO/Services и введения Language Enum.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -113,7 +113,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Updated\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"1995-01-01\",\n  \"locale\": \"en\",\n  \"cityId\": 1,\n  \"languages\": [\n    {\"languageCode\": \"ru\", \"level\": \"NATIVE\"},\n    {\"languageCode\": \"en\", \"level\": \"FLUENT\"}\n  ]\n}"
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"1995-01-01\",\n  \"locale\": \"EN\",\n  \"cityId\": 1\n}"
             },
             "url": { "raw": "{{base_url}}/user/update" }
           }
@@ -193,6 +193,16 @@
           }
         },
         {
+          "name": "Get Topic by Slug",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/topics/kotlin" }
+          }
+        },
+        {
           "name": "Add My Topics",
           "request": {
             "method": "POST",
@@ -216,6 +226,21 @@
             ],
             "url": { "raw": "{{base_url}}/topics/me" }
           }
+        },
+        {
+          "name": "Remove My Topics",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topicIds\": [1, 2]\n}"
+            },
+            "url": { "raw": "{{base_url}}/topics/me" }
+          }
         }
       ]
     },
@@ -232,7 +257,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Evening Coding\",\n  \"description\": \"Let's build something cool\",\n  \"type\": \"IRL_PUBLIC_PLACE\",\n  \"cityId\": 1,\n  \"eventDate\": \"2026-05-01T18:00:00\",\n  \"topicIds\": [1, 2]\n}"
+              "raw": "{\n  \"title\": \"Evening Coding\",\n  \"description\": \"Let's build something cool\",\n  \"type\": \"IRL_PUBLIC_PLACE\",\n  \"language\": \"RU\",\n  \"cityId\": 1,\n  \"eventDate\": \"2026-05-01T18:00:00\",\n  \"topicIds\": [1, 2]\n}"
             },
             "url": { "raw": "{{base_url}}/events/create" }
           }
@@ -247,7 +272,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Updated Title\"\n}"
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"language\": \"EN\"\n}"
             },
             "url": { "raw": "{{base_url}}/events/1" }
           }
@@ -260,6 +285,16 @@
               { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
             ],
             "url": { "raw": "{{base_url}}/events/1/join" }
+          }
+        },
+        {
+          "name": "Leave Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/events/1/leave" }
           }
         },
         {
@@ -352,7 +387,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"page\": 1,\n  \"perPage\": 10\n}"
+              "raw": "{\n  \"page\": 0,\n  \"perPage\": 10\n}"
             },
             "url": { "raw": "{{base_url}}/search/users" }
           }
@@ -391,7 +426,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"page\": 1,\n  \"perPage\": 10\n}"
+              "raw": "{\n  \"page\": 0,\n  \"perPage\": 10\n}"
             },
             "url": { "raw": "{{base_url}}/geo/cities/all" }
           }
