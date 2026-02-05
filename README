@@ -1,3 +1,0 @@
-[local run]
-- launch postgres instance locally
-- run gradle configuration with arguments `-config=app/src/main/resources/application-dev.conf`
