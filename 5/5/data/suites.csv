@@ -1,0 +1,3 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","1621","blocked user should disappear from search results()","","Thu Feb 05 19:13:42 UTC 2026","passed","Thu Feb 05 19:13:43 UTC 2026","","org.patifiner.app.SystemIntegrationTest","org.patifiner.app.SystemIntegrationTest","blocked user should disappear from search results"
+"","462","verify full application koin graph()","","Thu Feb 05 19:13:41 UTC 2026","passed","Thu Feb 05 19:13:42 UTC 2026","","org.patifiner.app.KoinModuleTest","org.patifiner.app.KoinModuleTest","verify full application koin graph"
