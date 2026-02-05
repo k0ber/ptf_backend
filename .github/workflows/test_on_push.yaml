@@ -47,6 +47,12 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
+      - name: Collect Allure Results
+        if: always()
+        run: |
+          mkdir -p build/allure-results
+          find . -type d -name "allure-results" -not -path "./build/*" -exec cp -r {}/. build/allure-results/ \;
+
       - name: Build Allure Report
         uses: simple-elf/allure-report-action@master
         if: always()
