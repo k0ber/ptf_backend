@@ -1,10 +1,12 @@
 name: Test on Push
 
 on:
-  push:
-    branches: [ "**" ]
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths-ignore: # skip tests if only this files changed
+      - '**.md'
+      - '.gitignore'
 
 permissions:
   contents: write
@@ -49,7 +51,9 @@ jobs:
         uses: simple-elf/allure-report-action@master
         if: always()
         with:
-          allure_results: build/allure-results **/allure-results
+          allure_results: build/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
           allure_history: allure-history
           keep_reports: 20
           subfolder: ${{ github.run_number }}
@@ -61,7 +65,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
-          force_orphan: true
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
 
