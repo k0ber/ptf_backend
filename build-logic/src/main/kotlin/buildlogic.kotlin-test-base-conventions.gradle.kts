@@ -12,6 +12,14 @@ testing {
             targets.all {
                 testTask.configure {
                     failOnNoDiscoveredTests = false
+
+                    testLogging {
+                        events("passed", "skipped", "failed", "standardOut", "standardError")
+                        showExceptions = true
+                        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                        showCauses = true
+                        showStackTraces = true
+                    }
                 }
             }
         }

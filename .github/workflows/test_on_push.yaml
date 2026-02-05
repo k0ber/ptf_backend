@@ -30,6 +30,13 @@ jobs:
       - name: Run Tests
         run: ./gradlew test --info --continue
 
+      - name: Upload Test HTML Reports
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: gradle-test-reports
+          path: "**/build/reports/tests/test/"
+
       - name: Load Allure history
         uses: actions/checkout@v4
         if: always()
