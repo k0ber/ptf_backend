@@ -1,0 +1,5 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","7904","should upload image successfully()","","Fri Feb 06 20:33:00 UTC 2026","passed","Fri Feb 06 20:33:08 UTC 2026","","org.patifiner.upload.UploadIntegrationTest","org.patifiner.upload.UploadIntegrationTest","should upload image successfully"
+"","9423","test full auth cycle()","","Fri Feb 06 20:33:00 UTC 2026","passed","Fri Feb 06 20:33:10 UTC 2026","","org.patifiner.user.UserIntegrationTest","org.patifiner.user.UserIntegrationTest","test full auth cycle"
+"","2847","blocked user should disappear from search results()","","Fri Feb 06 20:33:10 UTC 2026","passed","Fri Feb 06 20:33:13 UTC 2026","","org.patifiner.app.SystemIntegrationTest","org.patifiner.app.SystemIntegrationTest","blocked user should disappear from search results"
+"","2197","verify full application koin graph()","","Fri Feb 06 20:33:08 UTC 2026","passed","Fri Feb 06 20:33:10 UTC 2026","","org.patifiner.app.KoinModuleTest","org.patifiner.app.KoinModuleTest","verify full application koin graph"
