@@ -67,6 +67,8 @@ jobs:
       - name: Create Redirect to Latest Report
         if: always()
         run: |
+          mkdir -p allure-history
+          sudo chown -R $USER:$USER allure-history
           echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=./${{ github.run_number }}/" /></head><body>Redirecting to latest report...</body></html>' > allure-history/index.html
 
       - name: Deploy Allure Report to GitHub Pages
