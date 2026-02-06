@@ -1,8 +1,13 @@
 plugins {
-    id("buildlogic.kotlin-test-base-conventions")
+    id("buildlogic.kotlin-common-conventions")
+    `jvm-test-suite`
 }
 
-val aspectjAgent: Configuration by configurations.creating
+val allureAgent: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isTransitive = false
+}
 
 dependencies {
     api(platform(libs.junit.bom))
@@ -25,17 +30,39 @@ dependencies {
     api(platform(libs.allure.bom))
     api(libs.allure.junit5)
 
-    aspectjAgent(libs.aspectj.weaver) {
-        isTransitive = false
-    }
+    allureAgent(libs.aspectj.weaver)
 }
 
-tasks.withType<Test> {
-    val agentFile = aspectjAgent.incoming.artifacts.resolvedArtifacts.map { it.first().file }
+testing {
+    suites {
+        @Suppress("UnstableApiUsage", "unused")
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
 
-    jvmArgumentProviders.add(CommandLineArgumentProvider {
-        listOf("-javaagent:${agentFile.get().absolutePath}")
-    })
+            targets.all {
+                testTask.configure {
+                    val allureResultsDir = rootProject.layout.buildDirectory
+                        .dir("allure-results").get().asFile
 
-    systemProperty("allure.results.directory", layout.buildDirectory.dir("allure-results").get().asFile.absolutePath)
+                    doFirst {
+                        if (!allureResultsDir.exists()) allureResultsDir.mkdirs()
+                    }
+
+                    systemProperty("allure.results.directory", allureResultsDir.absolutePath)
+                    systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
+
+                    val agentFile = allureAgent.files.firstOrNull()
+                    if (agentFile != null) {
+                        jvmArgs("-javaagent:${agentFile.absolutePath}")
+                    }
+
+                    testLogging {
+                        events("passed", "skipped", "failed")
+                        showExceptions = true
+                        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                    }
+                }
+            }
+        }
+    }
 }
