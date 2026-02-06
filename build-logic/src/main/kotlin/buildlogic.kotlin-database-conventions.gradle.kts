@@ -2,8 +2,8 @@ plugins {
     id("buildlogic.kotlin-common-conventions")
 }
 
-dependencies { // todo: review required
-    implementation(libs.exposed.core)   // Основной модуль Exposed
+dependencies {
+    implementation(libs.exposed.core)
     implementation(libs.exposed.kotlin.datetime)
     implementation(libs.exposed.dao)    // Exposed для DAO
     implementation(libs.exposed.jdbc)   // Exposed для работы с JDBC

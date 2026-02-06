@@ -1,5 +1,7 @@
 package org.patifiner.search
 
+import kotlinx.coroutines.Dispatchers
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.patifiner.base.PagedRequest
 import org.patifiner.database.enums.TopicLevel
 import org.patifiner.relations.RelationsDao
@@ -14,12 +16,12 @@ internal class SearchService(
     private val topicDao: TopicDao,
     private val relationsDao: RelationsDao
 ) {
-    suspend fun findTopicIdea(myUserId: Long): TopicIdeaDto? {
+    suspend fun findTopicIdea(myUserId: Long): TopicIdeaDto? = newSuspendedTransaction(Dispatchers.IO) {
         val myTopics = topicDao.getUserTopics(myUserId)
         val myUserProfile = userDao.getById(myUserId)
 
         if (myTopics.isEmpty()) {
-            return TopicIdeaDto(
+            return@newSuspendedTransaction TopicIdeaDto(
                 person = UserProfileDto(myUserProfile.toDto(), myTopics),
                 topic = topicDao.getTopicsTree().first(),
                 idea = getIdeaForEmptyTopics()
@@ -35,7 +37,7 @@ internal class SearchService(
 
         // 2. Если никого нет — возвращаем null.
         // Фронт покажет "Идей пока нет, мы маякнем тебе нотификацией"
-        if (candidateId == null) return null
+        if (candidateId == null) return@newSuspendedTransaction null
 
         val candidateEntity = userDao.getById(candidateId)
         val candidateTopics = topicDao.getUserTopics(candidateId)
@@ -50,16 +52,16 @@ internal class SearchService(
         val myTopic = myTopics.first { it.topic.id == chosenTopicId }
         val candidateTopic = candidateTopics.first { it.topic.id == chosenTopicId }
 
-        return TopicIdeaDto(
+        TopicIdeaDto(
             person = UserProfileDto(candidateEntity.toDto(), candidateTopics),
             topic = myTopic.topic,
             idea = getIdeaText(myUserProfile.toDto(), myTopic, candidateEntity.toDto(), candidateTopic)
         )
     }
 
-    suspend fun findUsers(myId: Long, req: PagedRequest): List<UserDto> {
+    suspend fun findUsers(myId: Long, req: PagedRequest): List<UserDto> = newSuspendedTransaction(Dispatchers.IO) {
         val myTopics = topicDao.getUserTopics(myId)
-        if (myTopics.isEmpty()) return emptyList()
+        if (myTopics.isEmpty()) return@newSuspendedTransaction emptyList()
 
         val excludeUserIds = relationsDao.getMutedUserIds(myId) + myId
         val topicIds = myTopics.map { it.topic.id }
@@ -70,7 +72,7 @@ internal class SearchService(
             pagedRequest = req
         )
 
-        return userDao.getUsersByIds(userIds)
+        userDao.getUsersByIds(userIds)
     }
 
     //region helpers

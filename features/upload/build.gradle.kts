@@ -7,4 +7,6 @@ plugins {
 dependencies {
     implementation(projects.core.auth)
     implementation(projects.core.base)
+
+    testImplementation(projects.core.testing)
 }

@@ -1,9 +1,9 @@
 package org.patifiner.topics.api
 
 import io.ktor.http.HttpStatusCode
-import org.patifiner.base.PatifinerException
+import org.patifiner.base.PtfException
 
-sealed class TopicsException(message: String, code: String, statusCode: HttpStatusCode) : PatifinerException(message, code, statusCode) {
+sealed class TopicsException(message: String, code: String, statusCode: HttpStatusCode) : PtfException(message, code, statusCode) {
 
     class UserNotFoundException(topicId: Long) :
         TopicsException("User not found: $topicId", "USER_NOT_FOUND", HttpStatusCode.NotFound)

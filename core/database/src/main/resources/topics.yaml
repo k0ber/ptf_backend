@@ -3,20 +3,26 @@ topics:
   - name: "🏃‍♂️ Activity"
     slug: sports_outdoor
     description: "Active recreation, team sports, and fitness."
-    tags: [sports, fitness, outdoors]
+    tags: [sports, fitness, outdoors, health]
     children:
       - name: "⚽ Football / Soccer"
         slug: football
+        tags: [team_sports, ball_games]
       - name: "🏀 Basketball"
         slug: basketball
+        tags: [team_sports, ball_games]
       - name: "🏋️‍♀️ Gym & Fitness"
         slug: gym_fitness
+        tags: [fitness, health]
       - name: "🚴‍♀️ Cycling"
         slug: cycling
+        tags: [outdoors, cardio]
       - name: "🏕 Camping & Hiking"
         slug: camping_hiking
+        tags: [outdoors, adventure]
       - name: "🏄 Water Sports"
         slug: water_sports
+        tags: [water, summer]
         children:
           - name: "🏊 Swimming"
             slug: swimming
@@ -28,10 +34,11 @@ topics:
   - name: "🎮 Gaming"
     slug: gaming
     description: "Video games, board games, and role-playing adventures."
-    tags: [games, entertainment]
+    tags: [games, entertainment, digital, geek]
     children:
       - name: "💻 PC Gaming"
         slug: pc_gaming
+        tags: [pc, digital]
         children:
           - name: "🔥 Counter-Strike 2"
             slug: cs2
@@ -43,6 +50,7 @@ topics:
             slug: valheim
       - name: "🎮 Console Gaming"
         slug: console_gaming
+        tags: [console, digital]
         children:
           - name: "🎮 PlayStation"
             slug: playstation
@@ -52,6 +60,7 @@ topics:
             slug: nintendo_switch
       - name: "🎲 Board Games"
         slug: board_games
+        tags: [offline, social]
         children:
           - name: "♟ Chess"
             slug: chess
@@ -61,6 +70,7 @@ topics:
             slug: catan
       - name: "🧝 Tabletop RPG"
         slug: tabletop_rpg
+        tags: [creative, roleplay, social]
         children:
           - name: "🐉 Dungeons & Dragons"
             slug: dnd
@@ -69,18 +79,23 @@ topics:
 
   - name: "🎨 Art"
     slug: art_creativity
-    tags: [art, creativity]
+    tags: [art, creativity, handmade]
     children:
       - name: "🖌 Drawing & Painting"
         slug: drawing_painting
+        tags: [visual_art]
       - name: "📸 Photography"
         slug: photography
+        tags: [visual_art, tech]
       - name: "🎭 Acting & Theatre"
         slug: acting
+        tags: [performance]
       - name: "🎬 Filmmaking"
         slug: filmmaking
+        tags: [performance, tech]
       - name: "🎵 Music & Singing"
         slug: music
+        tags: [audio]
         children:
           - name: "🎸 Guitar"
             slug: guitar
@@ -92,6 +107,7 @@ topics:
             slug: drums
       - name: "🧶 Crafts & DIY"
         slug: crafts_diy
+        tags: [handmade]
         children:
           - name: "🪡 Sewing"
             slug: sewing
@@ -102,10 +118,11 @@ topics:
 
   - name: "📚 Learning"
     slug: learning
-    tags: [education, study]
+    tags: [education, study, self_development]
     children:
       - name: "🗣 Languages"
         slug: languages
+        tags: [communication]
         children:
           - name: "🇬🇧 English"
             slug: english
@@ -119,6 +136,7 @@ topics:
             slug: german
       - name: "💻 Programming"
         slug: programming
+        tags: [tech, digital, career]
         children:
           - name: "☕ Kotlin"
             slug: kotlin
@@ -130,12 +148,14 @@ topics:
             slug: ai_ml
       - name: "📊 Business & Marketing"
         slug: business_marketing
+        tags: [career, money]
       - name: "🎓 Study Groups"
         slug: study_groups
+        tags: [social]
 
   - name: "✈️ Exploration"
     slug: travel
-    tags: [travel, adventure]
+    tags: [travel, adventure, outdoors]
     children:
       - name: "🗺 Backpacking"
         slug: backpacking
@@ -150,7 +170,7 @@ topics:
 
   - name: "🐾 Pets"
     slug: pets
-    tags: [animals, care, pets]
+    tags: [animals, nature]
     children:
       - name: "🐶 Dogs"
         slug: dogs
@@ -165,7 +185,7 @@ topics:
 
   - name: "💻 Technology"
     slug: tech_science
-    tags: [tech, science]
+    tags: [tech, science, future]
     children:
       - name: "🚀 Space & Astronomy"
         slug: astronomy
@@ -173,14 +193,15 @@ topics:
         slug: science
       - name: "📱 Gadgets & Hardware"
         slug: gadgets
-      - name: "🧠 Artificial Intelligence"
+      - name: [ai, tech]
+        name: "🧠 Artificial Intelligence"
         slug: ai
       - name: "🔧 Engineering & Robotics"
         slug: robotics
 
   - name: "🍳 Food"
     slug: food_cooking
-    tags: [food, cooking]
+    tags: [food, cooking, lifestyle]
     children:
       - name: "🍕 Home Cooking"
         slug: home_cooking
@@ -195,7 +216,7 @@ topics:
 
   - name: "🧘 Wellness"
     slug: wellness
-    tags: [health, wellbeing]
+    tags: [health, lifestyle, mindfulness]
     children:
       - name: "🧘 Yoga"
         slug: yoga
@@ -210,7 +231,7 @@ topics:
 
   - name: "🤝 Social"
     slug: social_volunteering
-    tags: [social, community]
+    tags: [social, community, help]
     children:
       - name: "💬 Conversation Clubs"
         slug: conversation_clubs

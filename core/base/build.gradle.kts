@@ -4,4 +4,5 @@ plugins {
 }
 
 dependencies {
+    implementation(libs.ktor.server.content.negotiation)
 }

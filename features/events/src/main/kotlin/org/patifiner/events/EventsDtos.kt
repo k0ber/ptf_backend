@@ -2,6 +2,7 @@ package org.patifiner.events
 
 import kotlinx.datetime.LocalDateTime
 import org.patifiner.database.enums.EventType
+import org.patifiner.database.enums.Language
 import org.patifiner.database.enums.ParticipantStatus
 import org.patifiner.database.tables.EventEntity
 import org.patifiner.database.tables.UserParticipantEntity
@@ -13,7 +14,7 @@ data class EventDto(
     val title: String,
     val description: String?,
     val type: EventType,
-    val language: String,
+    val language: Language,
     val creator: UserDto,
     val cityId: Long?,
     val cityName: String?,

@@ -7,4 +7,6 @@ plugins {
 dependencies {
     implementation(libs.fasterxml.jackson.yaml)
     implementation(libs.exposed.json)
+
+    implementation(projects.core.base)
 }

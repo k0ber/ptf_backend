@@ -7,19 +7,23 @@ import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 import org.patifiner.database.enums.EventType
+import org.patifiner.database.enums.Language
 import org.patifiner.database.enums.ParticipantStatus
 
 object EventsTable : LongIdTable("events") {
     val title = varchar("title", 255)
     val description = text("description").nullable()
-    val type = enumerationByName("type", 20, EventType::class).default(EventType.IRL_PUBLIC_PLACE)
-    val language = varchar("language", 10).default("ru") // todo locale
+    val type = enumerationByName("type", 20, EventType::class)
+        .default(EventType.IRL_PUBLIC_PLACE)
+    val language = enumerationByName("language", 10, Language::class)
+        .default(Language.RU)
     val creator = reference("creator_id", UserTable)
     val city = reference("city_id", CitiesTable).nullable()
     val imageUrl = varchar("image_url", 511).nullable()
     val eventDate = datetime("event_date").nullable()
     val schedule = varchar("schedule", 255).nullable()
-    val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
+    val createdAt = datetime("created_at")
+        .defaultExpression(CurrentDateTime)
 }
 
 class EventEntity(id: EntityID<Long>) : LongEntity(id) {

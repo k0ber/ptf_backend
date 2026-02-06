@@ -1,13 +1,9 @@
 package org.patifiner.app
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule.Builder
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.netty.EngineMain
-import io.ktor.server.plugins.callloging.CallLogging
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.request.httpMethod
@@ -18,12 +14,17 @@ import org.jetbrains.exposed.sql.Database
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import org.patifiner.auth.JwtConfig
 import org.patifiner.auth.authModule
-import org.patifiner.auth.installAuth
+import org.patifiner.auth.installPtfAuth
+import org.patifiner.base.PtfDbConfig
+import org.patifiner.base.PtfJwtConfig
+import org.patifiner.base.coreModule
+import org.patifiner.base.installPtfSerialization
+import org.patifiner.base.installPtfStatusPages
 import org.patifiner.check.di.checkModule
 import org.patifiner.check.routes.checkRoutes
-import org.patifiner.database.DatabaseInitializer
+import org.patifiner.database.DbInitializer
+import org.patifiner.database.databaseModule
 import org.patifiner.events.api.eventsRoutes
 import org.patifiner.events.eventsModule
 import org.patifiner.geo.api.geoRoutes
@@ -53,13 +54,14 @@ internal fun Application.module() {
     install(Koin) {
         slf4jLogger()
         modules(
-            appModule(config),
+            coreModule,
             authModule(config),
             checkModule(config),
+            databaseModule(config),
+            uploadModule(config),
             userModule,
             topicsModule,
             searchModule,
-            uploadModule,
             geoModule,
             eventsModule,
             relationsModule,
@@ -67,17 +69,18 @@ internal fun Application.module() {
     }
 
     val logger: Logger by inject()
-    val jwtConfig: JwtConfig by inject()
-    val databaseConfig: DatabaseConfig by inject()
-    val databaseInitializer: DatabaseInitializer by inject()
+    val jwtConfig: PtfJwtConfig by inject()
+    val databaseConfig: PtfDbConfig by inject()
+    val databaseInitializer: DbInitializer by inject()
     //endregion
 
-    installAuth(jwtConfig)
-    installStatusPages(logger)
-    initDatabase(databaseConfig, databaseInitializer, logger)
-    installSerialization()
-    installCallLogs()
-    installCors()
+    initPtfDatabase(databaseConfig, databaseInitializer, logger)
+
+    installPtfAuth(jwtConfig)
+    installPtfStatusPages(logger)
+    installPtfSerialization()
+    installPtfCallLogs()
+    installPtfCors()
 
     routing {
         checkRoutes()
@@ -93,19 +96,7 @@ internal fun Application.module() {
     logger.info("Server has started")
 }
 
-private fun Application.installSerialization() {
-    install(ContentNegotiation) {
-        jackson {
-            enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT)
-            disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
-            registerModule(JavaTimeModule())    // LocalDate/LocalDateTime
-            registerModule(Builder().build())   // Kotlin data classes
-        }
-    }
-}
-
-private fun Application.installCallLogs() {
+private fun Application.installPtfCallLogs() {
     // todo: Disable in prod
     install(DoubleReceive)
     install(CallLogging) {
@@ -119,7 +110,7 @@ private fun Application.installCallLogs() {
     }
 }
 
-private fun Application.installCors() {
+private fun Application.installPtfCors() {
     install(CORS) {
         allowHost(CORS_HOST, schemes = listOf("https"))
 
@@ -135,8 +126,8 @@ private fun Application.installCors() {
     }
 }
 
-private fun Application.initDatabase(databaseConfig: DatabaseConfig, databaseInitializer: DatabaseInitializer, logger: Logger) {
-    with(databaseConfig) {
+private fun Application.initPtfDatabase(dbConfig: PtfDbConfig, databaseInitializer: DbInitializer, logger: Logger) {
+    with(dbConfig) {
         logger.info("Connecting to database at $url")
         Database.connect(url, driver, user, password)
     }

@@ -1,8 +1,8 @@
 plugins {
     id("buildlogic.kotlin-library-conventions")
     id("buildlogic.kotlin-server-conventions")
-    id("buildlogic.kotlin-test-conventions")
     id("buildlogic.kotlin-database-conventions")
+    id("buildlogic.kotlin-test-conventions")
 }
 
 dependencies {
@@ -12,4 +12,6 @@ dependencies {
     implementation(projects.features.upload)
     implementation(libs.mindrot.jbcrypt)
     implementation(libs.fasterxml.jackson.yaml)
+
+    testImplementation(projects.core.testing)
 }

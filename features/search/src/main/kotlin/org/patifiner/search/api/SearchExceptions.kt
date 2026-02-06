@@ -1,9 +1,9 @@
 package org.patifiner.search.api
 
 import io.ktor.http.HttpStatusCode
-import org.patifiner.base.PatifinerException
+import org.patifiner.base.PtfException
 
-sealed class SearchException(message: String, code: String) : PatifinerException(message, code, HttpStatusCode.NotFound) {
+sealed class SearchException(message: String, code: String) : PtfException(message, code, HttpStatusCode.NotFound) {
 
 //    class NoUserTopicsException(userId: Long) : SearchException("User $userId has no topics")
 //

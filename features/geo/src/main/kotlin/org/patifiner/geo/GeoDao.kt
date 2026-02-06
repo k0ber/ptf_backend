@@ -1,31 +1,27 @@
 package org.patifiner.geo
 
-import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.lowerCase
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.patifiner.database.tables.CitiesTable
 import org.patifiner.database.tables.CityEntity
 
 interface GeoDao {
-    suspend fun searchCities(query: String): List<CityDto>
-    suspend fun getCities(limit: Int, offset: Long): List<CityDto>
-    suspend fun getTotalCitiesCount(): Long
+    fun searchCities(query: String): List<CityDto>
+    fun getCities(limit: Int, offset: Long): List<CityDto>
+    fun getTotalCitiesCount(): Long
 }
 
 class ExposedGeoDao : GeoDao {
-    override suspend fun searchCities(query: String): List<CityDto> = newSuspendedTransaction(Dispatchers.IO) {
+
+    override fun searchCities(query: String): List<CityDto> =
         CityEntity.find { CitiesTable.name.lowerCase() like "${query.lowercase()}%" }
             .limit(20)
             .map { it.toDto() }
-    }
 
-    override suspend fun getCities(limit: Int, offset: Long): List<CityDto> = newSuspendedTransaction(Dispatchers.IO) {
+    override fun getCities(limit: Int, offset: Long): List<CityDto> =
         CityEntity.all()
             .limit(limit, offset)
             .map { it.toDto() }
-    }
 
-    override suspend fun getTotalCitiesCount(): Long = newSuspendedTransaction(Dispatchers.IO) {
-        CityEntity.count()
-    }
+    override fun getTotalCitiesCount(): Long = CityEntity.count()
+
 }

@@ -1,4 +1,4 @@
-package org.patifiner.app
+package org.patifiner.base
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -7,14 +7,13 @@ import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
-import org.patifiner.base.PatifinerException
 import org.slf4j.Logger
 
 data class ErrorResponse(val code: String, val message: String)
 
-fun Application.installStatusPages(logger: Logger) {
+fun Application.installPtfStatusPages(logger: Logger) {
     install(StatusPages) {
-        exception<PatifinerException> { call, cause ->
+        exception<PtfException> { call, cause ->
             logger.error("[${cause.code}] ${cause.message}")
             call.respond(cause.statusCode, ErrorResponse(cause.code, cause.message))
         }
@@ -28,4 +27,3 @@ fun Application.installStatusPages(logger: Logger) {
         }
     }
 }
-

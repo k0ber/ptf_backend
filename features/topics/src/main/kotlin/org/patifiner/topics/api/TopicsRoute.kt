@@ -1,7 +1,6 @@
 package org.patifiner.topics.api
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -43,8 +42,13 @@ fun Route.topicsRoutes() {
                 call.respond(tree)
             }
 
+            get("/tags") {
+                val tagsGroups = topicsService.getTopicsByTags()
+                call.respond(tagsGroups)
+            }
+
             get("/{slug}") {
-                val slug = call.parameters["slug"] ?: "" //return@get call.respond(HttpStatusCode.BadRequest)
+                val slug = call.parameters["slug"] ?: ""
                 val topic = topicsService.getBySlug(slug)
                 if (topic != null) call.respond(topic)
                 else call.respond(HttpStatusCode.NotFound)

@@ -13,6 +13,7 @@ include(
     ":core:auth",
     ":core:database",
     ":core:postgres",
+    ":core:testing",
 
     ":features:check",
     ":features:search",

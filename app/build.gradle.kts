@@ -1,6 +1,8 @@
 plugins {
     id("buildlogic.kotlin-application-conventions")
     id("buildlogic.kotlin-server-conventions")
+    id("buildlogic.kotlin-database-conventions")
+    id("buildlogic.kotlin-test-conventions")
 }
 
 dependencies {
@@ -25,6 +27,8 @@ dependencies {
     implementation(projects.features.geo)
     implementation(projects.features.events)
     implementation(projects.features.relations)
+
+    testImplementation(projects.core.testing)
 }
 
 application {
